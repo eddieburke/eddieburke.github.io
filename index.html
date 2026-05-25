@@ -116,18 +116,12 @@
       .status__text{-ms-flex-align:center;align-items:center;background-color:#fff;display:-ms-flexbox;display:flex;font-size:7vw;height:10vw;line-height:28px;padding:0 6vw;position:absolute;text-align:center;text-transform:uppercase}
       @media screen and (max-width:320px){.status__text{font-size:22px;height:32px;padding:0 19px}}
       
-      /* Toggle status templates */
-      .status__text.default { display: none }
-      .status__text.activated { display: none }
-      .status__text.pending { display: none }
-      .status__text.expired { display: none }
-
       .area{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-negative:0;flex-shrink:0}
       .area,.area__space{-ms-flex-positive:1;flex-grow:1}
       .area__unavailable__action{background-color:#a3a3a3;border:1px solid #a3a3a3;text-align:center;padding:10px;white-space:nowrap;color:hsla(0,0%,100%,.8);font-size:1.5em;margin:18px 12px;box-shadow:0 3px 3px 0 #bbb}
       .area__unavailable__action_time{color:#fff;font-size:.45em}
       .area__default__info{padding:22px 30px 10px;font-size:1.2em;text-align:center;color:#404952}
-      .area__default__action{background-color:#266c2f;border:1px solid #266c2f;text-align:center;padding:10px;white-space:nowrap;color:#fff;font-size:1.5em;margin:18px 12px;box-shadow:0 3px 3px 0 #bbb;font-weight:700;border-radius:8px;cursor:pointer}
+      .area__default__action{background-color:#266c2f;border:1px solid #266c2f;text-align:center;padding:10px;white-space:nowrap;color:#fff;font-size:1.5em;margin:18px 12px;box-shadow:0 3px 3px 0 #bbb}
       .area__activated{color:#fff}
       .area__activated__info{padding:15px 30px 10px;font-size:1.2em;text-align:center}
       .area__activated__timer{text-align:center;font-size:2.5em;font-weight:200;padding-bottom:20px;text-transform:uppercase}
@@ -143,17 +137,17 @@
       .ticket--pending{animation:pendingBackground 2s linear infinite}
       .ticket--pending .direction{background-color:transparent!important}
       .ticket--pending .activated,.ticket--pending .area__fullyActiveInfo,.ticket--pending .default,.ticket--pending .desktop,.ticket--pending .errored,.ticket--pending .expired{display:none}
-      .ticket--pending .status__text.pending { display: flex; animation:pendingColor 2s linear infinite; font-size:5vw; padding:0 2vw; }
+      .status__text.pending{animation:pendingColor 2s linear infinite;font-size:5vw;padding:0 2vw}
 
       .ticket--activated{animation:activatedBackground 2s linear infinite}
       .ticket--activated .direction{background-color:transparent!important}
       .ticket--activated .area__pending,.ticket--activated .default,.ticket--activated .desktop,.ticket--activated .errored,.ticket--activated .expired,.ticket--activated .pending{display:none}
-      .ticket--activated .status__text.activated { display: flex; animation:activatedColor 2s linear infinite; font-size:6vw; padding:0 3vw; }
+      .status__text.activated{animation:activatedColor 2s linear infinite;font-size:6vw;padding:0 3vw}
 
       .ticket--expired{animation:expiredBackground 2s linear infinite}
       .ticket--expired .direction{background-color:transparent!important}
       .ticket--expired .activated,.ticket--expired .any-activated,.ticket--expired .default,.ticket--expired .desktop,.ticket--expired .errored,.ticket--expired .pending{display:none}
-      .ticket--expired .status__text.expired { display: flex; animation:expiredColor 2s linear infinite; }
+      .status__text.expired{animation:expiredColor 2s linear infinite}
 
       .ticket--errored #error{color:#b91c1c}
       .ticket--errored .activated,.ticket--errored .any-activated,.ticket--errored .default,.ticket--errored .desktop,.ticket--errored .expired,.ticket--errored .pending{display:none}
@@ -710,9 +704,9 @@
           roundEl.style.backgroundColor = 'rgb(157, 157, 157)';
           whiteAreaEl.style.boxShadow = 'rgb(157, 157, 157) 0px 6px 6px 0px';
           
-          document.getElementById('status-inactive').style.display = 'flex';
-          document.getElementById('status-pending').style.display = 'none';
-          document.getElementById('status-active').style.display = 'none';
+          document.getElementById('status-inactive').style.display = (selectedFrame === 'desktop') ? 'none' : 'flex';
+          document.getElementById('status-not-valid-for-travel').style.display = 'none';
+          document.getElementById('status-valid-for-travel').style.display = 'none';
           document.getElementById('status-expired').style.display = 'none';
 
           document.getElementById('area-desktop-notice').style.display = (selectedFrame === 'desktop') ? 'flex' : 'none';
@@ -734,8 +728,8 @@
           whiteAreaEl.style.boxShadow = `0 6px 6px 0px ${pendingColors.primary}`;
 
           document.getElementById('status-inactive').style.display = 'none';
-          document.getElementById('status-pending').style.display = 'flex';
-          document.getElementById('status-active').style.display = 'none';
+          document.getElementById('status-not-valid-for-travel').style.display = 'flex';
+          document.getElementById('status-valid-for-travel').style.display = 'none';
           document.getElementById('status-expired').style.display = 'none';
 
           document.getElementById('area-desktop-notice').style.display = 'none';
@@ -759,8 +753,8 @@
           whiteAreaEl.style.boxShadow = `0 6px 6px 0px ${validationColors.primary}`;
 
           document.getElementById('status-inactive').style.display = 'none';
-          document.getElementById('status-pending').style.display = 'none';
-          document.getElementById('status-active').style.display = 'flex';
+          document.getElementById('status-not-valid-for-travel').style.display = 'none';
+          document.getElementById('status-valid-for-travel').style.display = 'flex';
           document.getElementById('status-expired').style.display = 'none';
 
           document.getElementById('area-desktop-notice').style.display = 'none';
@@ -783,8 +777,8 @@
           whiteAreaEl.style.boxShadow = '0 6px 6px 0px #404852';
 
           document.getElementById('status-inactive').style.display = 'none';
-          document.getElementById('status-pending').style.display = 'none';
-          document.getElementById('status-active').style.display = 'none';
+          document.getElementById('status-not-valid-for-travel').style.display = 'none';
+          document.getElementById('status-valid-for-travel').style.display = 'none';
           document.getElementById('status-expired').style.display = 'flex';
 
           document.getElementById('area-desktop-notice').style.display = 'none';
