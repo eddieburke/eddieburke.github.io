@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="user-scalable=no, initial-scale=0.8695035460992908, maximum-scale=0.8695035460992908, minimum-scale=0.8695035460992908, height=705">
+    <meta name="author" content="Mozio Inc.">
+    <meta name="description" content="Prop E-Ticket">
+    <title>Ticket</title>
+    <style>
+      /*! normalize.css v3.0.3 | MIT License */
+      html{font-family:Roboto,Helvetica-Neue,Helvetica,sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+      body,html{margin:0;padding:0;height:100%}
+      *{-webkit-touch-callout:none;-webkit-tap-highlight-color:rgba(0,0,0,0)!important}
+      img{border:0}
+      .ticket{-ms-flex-direction:column;flex-direction:column;background-color:#eef1f5;position:relative;transform:translateZ(0);min-width:320px;height:100%;overflow:scroll}
+      .date,.ticket{display:-ms-flexbox;display:flex}
+      .date{-ms-flex-flow:row nowrap;flex-flow:row nowrap;-ms-flex-pack:distribute;justify-content:space-around;padding:10px 0}
+      .date__column{text-align:center}
+      .date__value{font-size:1.13em;font-weight:700;padding:2px;color:#404852;white-space:nowrap}
+      .date__header{font-size:.7em;font-weight:700;padding:7px 0 0}
+      .direction{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-negative:0;flex-shrink:0;position:relative;border-bottom:6px solid #ee4832;color:#fff;min-height:106px}
+      .direction__logoContainer{text-align:center}
+      .direction__logo{height:45px;max-width:80%;padding:15px 0}
+      .direction__line{height:38px;white-space:nowrap;overflow:hidden;position:relative}
+      .direction__lineText{display:-ms-flexbox;display:flex;-ms-flex-align:center;align-items:center;-ms-flex-pack:center;justify-content:center;width:200%;position:absolute;font-weight:700;text-transform:uppercase;font-size:1.3em;left:-50%;animation:lineText1 3s .1s linear infinite;transform:translateX(0)}
+      .direction__lineText__item{-ms-flex:0 0 252px;flex:0 0 252px;text-align:center}
+      .direction__lineText__item:after{content:" ";display:block;background-color:#fff;width:6px;height:6px;border-radius:50%;margin:-21px 0 0 -27px}
+      .direction__location{font-size:1em;margin-top:0;margin-bottom:26px;text-align:center}
+      .direction__round{position:absolute;border:3px solid #fff;border-radius:50%;left:50%;margin-left:-12px;height:18px;width:18px;bottom:-15px}
+      .direction__lineText__item+.direction__lineText__item{padding-left:53px}
+      .whiteArea{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;background-color:#fff;margin-bottom:10px;-ms-flex-negative:0;flex-shrink:0}
+      .whiteArea__border{background-image:linear-gradient(90deg,#b1b3b6 33%,hsla(0,0%,100%,0) 0);background-position:bottom;background-size:6px 2px;background-repeat:repeat-x;width:100%;height:2px}
+      .information{display:-ms-flexbox;display:flex;-ms-flex-direction:row nowrap;-ms-flex-negative:0;flex-shrink:0;color:#404952;padding:22px 0;-ms-flex-pack:distribute;justify-content:space-around}
+      .information__block{-ms-flex-direction:column;flex-direction:column;-ms-flex-align:center;-ms-flex-pack:center;-ms-flex-preferred-size:50%;flex-basis:50%;text-align:center}
+      .information__block,.information__use{display:-ms-flexbox;display:flex;align-items:center;justify-content:center}
+      .information__use{-ms-flex-align:center;-ms-flex-pack:center}
+      .information__use--arrow{height:70px}
+      .information__border{width:1px;background-color:#b3b6ba;position:relative}
+      .information__text{font-weight:700;font-size:1.2em;white-space:nowrap;padding:0 0 10px;margin-top:-5px}
+      .information__count{font-size:3em}
+      .information__arrowIcon{width:40px}
+      .information__trainIcon{position:absolute;width:25px;left:-12px;top:36px}
+      .number{display:-ms-flexbox;display:flex;-ms-flex-pack:center;justify-content:center;font-size:1.2em;-ms-flex-negative:0;flex-shrink:0;padding:9px 0;white-space:nowrap}
+      .number__value{padding-left:4px;font-weight:700;color:#404952}
+      .status{-ms-flex-pack:center;justify-content:center}
+      .status{-ms-flex-align:center;align-items:center;display:-ms-flexbox;display:flex;padding:0 25px;position:relative}
+      .status__icon{display:block;width:100%}
+      .status__text{-ms-flex-align:center;align-items:center;background-color:#fff;display:-ms-flexbox;display:flex;height:10vw;line-height:28px;position:absolute;text-align:center;text-transform:uppercase}
+      @media screen and (max-width:320px){.status__text{font-size:22px;height:32px;padding:0 19px}}
+      .status__text.activated{animation:activatedColor 2s linear infinite;font-size:6vw;padding:0 3vw}
+      .area{display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-negative:0;flex-shrink:0}
+      .area,.area__space{-ms-flex-positive:1;flex-grow:1}
+      .area__activated{color:#fff}
+      .area__activated__info{padding:15px 30px 10px;font-size:1.2em;text-align:center}
+      .area__activated__timer{text-align:center;font-size:2.5em;font-weight:200;padding-bottom:20px;text-transform:uppercase}
+      .ticket--activated{animation:activatedBackground 2s linear infinite}
+      .ticket--activated .direction{background-color:transparent!important}
+      .ticket--pass .-isPass{display:block}
+      .overlay{position:absolute;top:0;right:0;bottom:0;left:0;background-color:hsla(0,0%,100%,.8);z-index:2}
+      @keyframes lineText1{0%{transform:translateX(0)}to{transform:translateX(-305px)}}
+      .sf-hidden{display:none!important}
+    </style>
+    
+    <style id="dynamic-theme">
+      @keyframes activatedBackground{
+        0%{background-color:rgb(80,73,132)}
+        50%{background-color:rgb(40,37,66)}
+        100%{background-color:rgb(80,73,132)}
+      }
+      @keyframes activatedColor{
+        0%{color:rgb(80,73,132)}
+        50%{color:rgb(255,255,255)}
+        100%{color:rgb(80,73,132)}
+      }
+    </style>
+
+    <!-- Invisible trigger area top right. Triple-click to open. -->
+    <style>
+      #secret-trigger {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        z-index: 99999;
+        cursor: pointer;
+      }
+      #secret-menu {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(20, 20, 25, 0.95);
+        color: #fff;
+        padding: 20px;
+        z-index: 100000;
+        border-radius: 12px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        width: 280px;
+        max-height: 90vh;
+        overflow-y: auto;
+        backdrop-filter: blur(5px);
+      }
+      #secret-menu label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+        font-size: 12px;
+        color: #aaa;
+      }
+      #secret-menu input[type="text"], #secret-menu input[type="number"], #secret-menu select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px;
+        margin-top: 4px;
+        border-radius: 4px;
+        border: 1px solid #444;
+        background: #333;
+        color: #fff;
+      }
+      #secret-menu button {
+        margin-top: 15px;
+        width: 100%;
+        padding: 10px;
+        background: #504984;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="warn warn--hidden sf-hidden" id="block-ticket"></div>
+    <div class="ticket ticket--activated ticket--pass" id="ticket" style="opacity:1">
+      <div class="direction" id="direction" style="background-color:rgb(80,73,132);border-color:rgb(80,73,132)">
+        <div class="direction__logoContainer">
+          <img src="data:image/png;base64,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r5Spr3pO/MJTXlpe4TnMQCSxgESmIkFHFBsqwEKNVI8VEmvbjHv4Bx58il0yuDTByzKMCFZLjB/+D392ahYlxNykUBzpebPtjCAjuAo2abX8f23bjBPA/A1day1+pA9OfpNdaWvQICG8DF9ctTd4DLneAviddMiRH8tMUCgXg/Yy+KQf03gJdq25vzX2cPgAZ6ip5AxwcAsNFyl7zeHdne2//nmn29wNSfnKajT66/wAAD4tpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+Cjx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDQuNC4wLUV4aXYyIj4KIDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+CiAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgIHhtbG5zOmlwdGNFeHQ9Imh0dHA6Ly9pcHRjLm9yZy9zdGQvSXB0YzR4bXBFeHQvMjAwOC0wMi0yOS8iCiAgICB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIKICAgIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiCiAgICB4bWxuczpwbHVzPSJodHRwOi8vbnMudXNlcGx1cy5vcmcvbGRmL3htcC8xLjAvIgogICAgeG1sbnM6R0lNUD0iaHR0cDovL3d3dy5naW1wLm9yZy94bXAvIgogICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iCiAgIHhtcE1NOkRvY3VtZW50SUQ9ImdpbXA6ZG9jaWQ6Z2ltcDowYTFjMmY3MC0xNmJkLTQxZWYtYjgzZi03YzE1MGMxYTI5NzEiCiAgIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OWEzMjQ2M2EtY2Q3MS00ZGM5LThlNjctZWY1NGNhYzc1MDg2IgogICB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MTE4YWIyNWMtMDhjOC00NGU3LWE0YjUtOTczMDQ1OWI1ZDlmIgogICBHSU1QOkFQST0iMi4wIgogICBHSU1QOlBsYXRmb3JtPSJMaW51eCIKICAgR0lNUDpUaW1lU3RhbXA9IjE1NTYxOTEwMDIzNjM3MDYiCiAgIEdJTVA6VmVyc2lvbj0iMi4xMC4xMCIKICAgZGM6Rm9ybWF0PSJpbWFnZS9wbmciCiAgIHRpZmY6T3JpZW50YXRpb249IjEiCiAgIHhtcDpDcmVhdG9yVG9vbD0iR0lNUCAyLjEwIj4KICAgPGlwdGNFeHQ6TG9jYXRpb25DcmVhdGVkPgogICAgPHJkZjpCYWcvPgogICA8L2lwdGNFeHQ6TG9jYXRpb25DcmVhdGVkPgogICA8aXB0Y0V4dDpMb2NhdGlvblNob3duPgogICAgPHJkZjpCYWcvPgogICA8L2lwdGNFeHQ6TG9jYXRpb25TaG93bj4KICAgPGlwdGNFeHQ6QXJ0d29ya09yT2JqZWN0PgogICAgPHJkZjpCYWcvPgogICA8L2lwdGNFeHQ6QXJ0d29ya09yT2JqZWN0PgogICA8aXB0Y0V4dDpSZWdpc3RyeUlkPgogICAgPHJkZjpCYWcvPgogICA8L2lwdGNFeHQ6UmVnaXN0cnlJZD4KICAgPHhtcE1NOkhpc3Rvcnk+CiAgICA8cmRmOlNlcT4KICAgICA8cmRmOmxpCiAgICAgIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiCiAgICAgIHN0RXZ0OmNoYW5nZWQ9Ii8iCiAgICAgIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6N2FhMzRmMzctMWVkMi00OWRiLThlMDktYmUyZWI3ZjE0ZWEzIgogICAgICBzdEV2dDpzb2Z0d2FyZUFnZW50PSJHaW1wIDIuMTAgKExpbnV4KSIKICAgICAgc3RFdnQ6d2hlbj0iKzAyOjAwIi8+CiAgICA8L3JkZjpTZXE+CiAgIDwveG1wTU06SGlzdG9yeT4KICAgPHBsdXM6SW1hZ2VTdXBwbGllcj4KICAgIDxyZGY6U2VxLz4KICAgPC9wbHVzOkltYWdlU3VwcGxpZXI+CiAgIDxwbHVzOkltYWdlQ3JlYXRvcj4KICAgIDxyZGY6U2VxLz4KICAgPC9wbHVzOkltYWdlQ3JlYXRvcj4KICAgPHBsdXM6Q29weXJpZ2h0T3duZXI+CiAgICA8cmRmOlNlcS8+CiAgIDwvcGx1czpDb3B5cmlnaHRPd25lcj4KICAgPHBsdXM6TGljZW5zb3I+CiAgICA8cmRmOlNlcS8+CiAgIDwvcGx1czpMaWNlbnNvcj4KICA8/cmRmOkRlc2NyaXB0aW9uPgogPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAKPC94OnhtcG1ldGE+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKPD94cGFja2V0IGVuZD0idyI/Pg2bCwsAAAAGYktHRAAXAFIAiknWYA0AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfjBBkLECoZuUk/AAAFO0lEQVR42u2cW2hcVRSGv5kkTdQUKmI1NiBq2kTjrTUm0mu0raLVYLWWYPFCxRihgkZb8cWVpQ+pQqs+iSJUI1jbqoWEKppYmhpp05sgVRtsi4j0ElAq2po0ifFh77HHZGYymTkzs4/MD/OSc2aff75Zs87aa++TUHNzMzmlX+EcghzoHOiccqCdVX4qbxaRy4FKoBqoAYaAZao6YI9PBd4GQsBuoAfoVdVjwEhWPrEQEqQUqABuAWYC5cAlwGTr9TRwHDgC7Af2AN+r6k8ZBS0itwLLgVqgzDNOrzUaUZ79QOVAHTAIfCciO4D3VfVAhgHfDDwELLC+CmKcPcW+rgbuBoaBw9b3ZlXdnj7QxugcYA2wCDgvylnjRWkBcKN9PSYi24AW0IOq/J0WvkIeyPXAC8BdwAVJDJNng6UceEREOoFXVbU70V9mfoIRPBVYDTQCxT4xmAzUA4tB3hBhnaqe8ReyFFvfTwEX+jRskY3yWhF5ywLvS/lmKCKzgI+B53yE7NVFwEvARyJypY+Qy6zvF32E7FUx8Cyw1TJKHrSILALagLkZyKJ3Au0iUuMD5NlAO3B7BnzPBtosq4mDtm9sBaZlsCAAAABJRU5ErkJggg==" id="logo" class="direction__logo">
+        </div>
+        <div class="direction__line">
+          <div class="direction__lineText">
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+            <span class="direction__lineText__item" id="disp-transit">GO Transit</span>
+          </div>
+        </div>
+        <div class="direction__location" id="disp-route">Ajax GO to Union Station GO - $10 One-Day Pass</div>
+        <div class="direction__round" id="round" style="background-color:rgb(80,73,132)"></div>
+      </div>
+      
+      <!-- White Area Data -->
+      <div class="whiteArea" id="whiteArea" style="box-shadow:rgb(80,73,132) 0px 6px 6px 0px">
+        <div class="information">
+          
+          <div class="information__block information__block--left">
+            <div class="information__use information__count">
+              x<span id="disp-passenger">1</span>
+            </div>
+            <div class="information__text">
+              Passenger(s)
+              <span class="information__text_max sf-hidden"> Max</span>
+            </div>
+            <div class="information__types" id="ticket-types">
+              <div id="disp-pass-type">1x $10 One-Day Pass</div>
+            </div>
+          </div>
+          
+          <div class="information__border">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA1OCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNiM2I2YmF9PC9zdHlsZT48L2RlZnM+PHRpdGxlPmljLXRyYWluPC90aXRsZT48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yNCAgMEMxMC44IDAgMCAxLjUyIDAgMTIuMjF2MjlhMTAuNzMgMTAuNzMgMCAwIDAgMTAuNSAxMC43TDYgNTYuNEg0OFY1OEgzM3YtMS41MmwtNC41LTQuNThBMTAuNzMgMTAuNzMgMCAwIDAgNDggNDEuMjJ2LTI5QzQ4IDEuNTMgMzcuMiAwIDAgMHoiPjwvcGF0aD48L3N2Zz4=" class="information__trainIcon">
+          </div>
+          
+          <div class="information__block information__block--right">
+            <div class="information__use information__use--arrow">
+              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjUuNjYgODYuNiI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM0NDRkNTV9PC9zdHlsZT48L2RlZnM+PHRpdGxlPmljLW9uZS13YXk8L3RpdGxlPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTEyMy44NSAzOUw4NC43OSAxLjEzYTQgNCAwIDEgMC01LjU3IDUuNzRsMzMuNDEgMzIuNDNINGE0IDQgMCAwIDAgMCA4aDEwOC42M0w3OS4yMSA3OS43M2E0IDQgMCAwIDAgNS45MyA1Ljc0bDM5LjA2LTM3LjkxYTUuOTMgNS45MyAwIDAgMCAwLTguNTN6IiBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIi8+PC9zdmc+" class="information__arrowIcon -isTicket sf-hidden" id="icon-ticket">
+              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOCAxNiI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiM0NDRkNTV9PC9zdHlsZT48L2RlZnM+PHRpdGxlPmljLW9uZS13YXk8L3RpdGxlPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTExLjUxIDExYTEuMDEgMS4wMSAwIDAgMS0uMDUtLjEyTDguNzIgNC4xIDIuMDUgNi44bDIuNzggNi44OEwxMS41IDExem0xLjg0LS43NWwyLjYtMS4wNS0yLjc4LTYuOS0yLjYgMS4wNiAyLjc0IDYuNzcuMDQuMTJ6bS0xMC4zOCA0LjJMLjIgNy41NGEyIDIgMCAwIDEgMS4xLTIuNkwxMi40My40NWEyIDIgMCAwIDEgMi42IDEuMWwyLjc5IDYuOWEyIDIgMCAwIDEtMS4xIDIuNmwtMTEuMTMgNC41YTIgMiAwIDAgMS0yLjYtMS4xeiIgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiIvPjwvc3ZnPg==" class="information__arrowIcon -isPass" id="icon-pass">
+            </div>
+            <div class="information__text">
+              <span class="information__text_value -isTicket sf-hidden" id="text-ticket">One-Way</span>
+              <span class="information__text_value -isPass" id="text-pass">Multi Use Pass</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="whiteArea__border"></div>
+        
+        <div class="number">
+          Ticket Number:
+          <div class="number__value" id="disp-ticket-num">...</div>
+        </div>
+        <div class="promo sf-hidden">PROMO CODE USED</div>
+        
+        <!-- Status Icon + Text - 1:1 original base64 injected here -->
+        <div class="status">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NzYgMTA4Ij48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2IzYjZiYX08L3N0eWxlPjwvZGVmcz48dGl0bGU+aWMtY29kZS1hY3RpdmU8L3RpdGxlPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTAgMGg4djEwOEgwem01MiAwaDh2MTA4aC04em0xNyAwaDE3djEwOEg2OXptMTI3IDBoMTd2MTA4aC0xN3ptMTMxIDBoMTd2MTA4aC0xN3ptMTMwIDBoMTd2MTA4aC0xN3ptMjA2IDBoMT92MTA4aC0xO3ptLTc5IDBoMTd2MTA4aC0xN3pNMjc1IDBoMjV2MTA4aC0yNXptMTMwIDBoMjV2MTA4aC0yNXptMTI3IDBoMjV2MTA4aC0yNXpNOTYgMGg4djEwOGgtOHptMTcgMGg4djEwOGgtOHptMTA5IDBoOHYxMDhoLTh6bTE4IDBoOHYxMDhoLTh6bTcwIDBoOHYxMDhoLTh6bTEzMCAwaDh2MTA4aC04ek0yNTggMGg4djEwOGgtOHptOTUgMGg4djEwOGgtOHptMTMxIDBoOHYxMDhoLTh6bTgyIDBoOHYxMDhoLTh6bTQ0IDBoOHYxMDhoLTh6bTE4IDBoOHYxMDhoLTh6bTE3IDBoOHYxMDhoLTh6TTUwMSAwaDh2MTA4aC04em0xMyAwaDh2MTA4aC04ek0zNzAgMGg4djEwOGgtOHptMTggMGg4djEwOGgtOHpNMTI2IDBoOHYxMDhoLTh6bTUyIDBoOHYxMDhoLTh6TTE3IDBoMjV2MTA4SDE3em0xMjcgMGgyNXYxMDhoLTI1eiIgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiIvPjwvc3ZnPg==" class="status__icon">
+          <div class="status__text activated" id="disp-status-text">Valid for travel</div>
+        </div>
+        
+        <!-- Date/Time Details -->
+        <div class="date">
+          <div class="date__column">
+            <div class="date__header">CURRENT TIME:</div>
+            <div class="date__value" id="date">...</div>
+          </div>
+          <div class="date__column activated">
+            <div class="date__header">TIME SINCE ACTIVATION:</div>
+            <div class="date__value" id="date-active">00:00:00</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Activated Area Bottom Bar -->
+      <div class="area area__activated any-activated">
+        <div class="area__space"></div>
+        <div class="area__activated__info">
+          <span class="area__fullyActiveInfo">Please show this screen to the proper authority on board the train.</span>
+        </div>
+        <div class="area__activated__timer" id="valid-time">24:00:00</div>
+      </div>
+    </div>
+
+
+    <!-- ==============================================
+         SECRET HIDDEN CUSTOMIZER MENU
+         ============================================== -->
+    <!-- Invisible trigger area top right. Triple-click to open. -->
+    <div id="secret-trigger"></div>
+    
+    <div id="secret-menu">
+      <div style="font-size: 16px; font-weight: bold; border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 10px;">
+        Ticket Customizer <button id="close-menu" style="float:right; width:auto; padding:2px 8px; margin:0; background:#990000;">X</button>
+      </div>
+      
+      <label>Route String</label>
+      <input type="text" id="cfg-route" value="Ajax GO to Union Station GO - $10 One-Day Pass">
+      
+      <label>Transit Brand Name</label>
+      <input type="text" id="cfg-transit" value="GO Transit">
+      
+      <label>Ticket Override (Optional)</label>
+      <input type="text" id="cfg-ticket-override" placeholder="Auto-generates if empty" value="">
+      
+      <label>Ticket Type UI</label>
+      <select id="cfg-type">
+        <option value="pass">Multi Use Pass (Double Arrows)</option>
+        <option value="ticket">One-Way (Single Arrow)</option>
+      </select>
+      
+      <label>Quantity Details</label>
+      <input type="text" id="cfg-pass-type" value="1x $10 One-Day Pass">
+      
+      <label>Passenger Count</label>
+      <input type="number" id="cfg-passenger" value="1">
+      
+      <label>Status Text</label>
+      <input type="text" id="cfg-status" value="Valid for travel">
+      
+      <label>Primary Theme Color</label>
+      <input type="color" id="cfg-color-primary" value="#504984">
+      
+      <label>Secondary / Dark Color</label>
+      <input type="color" id="cfg-color-secondary" value="#282542">
+      
+      <label>Hours Elapsed Since Activation (e.g. 2.5)</label>
+      <input type="number" id="cfg-elapsed" step="0.01" value="2.0">
+
+      <button id="apply-cfg">Apply & Resume</button>
+    </div>
+
+    <script>
+      /* ==============================================
+         Core Logic & Adaptive Algorithms
+         ============================================== */
+      
+      let elapsedSeconds = 2 * 60 * 60; // default 2 hours elapsed
+
+      // Heuristic Automatic Ticket Number Generator
+      function generateHeuristicTicketNumber() {
+        const overrideVal = document.getElementById('cfg-ticket-override').value;
+        if (overrideVal.trim() !== "") {
+          return overrideVal;
+        }
+
+        const routeText = document.getElementById('cfg-route').value;
+        const transitText = document.getElementById('cfg-transit').value;
+        
+        // UP Express vs GO Transit prefixing heuristic
+        const isUpExpress = routeText.toUpperCase().includes("UP") || 
+                            routeText.toUpperCase().includes("PEARSON") || 
+                            transitText.toUpperCase().includes("UP");
+        const prefix = isUpExpress ? "UP" : "MZ";
+        
+        // Stable, deterministic 8-digit sequence mapped to calendar day
+        // This ensures the value is persistent for film continuity across reloads!
+        const today = new Date().toDateString();
+        const seedStr = routeText + transitText + today;
+        let hash = 0;
+        for (let i = 0; i < seedStr.length; i++) {
+          hash = (hash << 5) - hash + seedStr.charCodeAt(i);
+          hash |= 0;
+        }
+        const num = Math.abs(hash) % 90000000 + 10000000;
+        return prefix + num;
+      }
+
+      function padZero(num) {
+        return num < 10 ? `0${num}` : num;
+      }
+
+      function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)},${parseInt(result[2], 16)},${parseInt(result[3], 16)}` : null;
+      }
+
+      // Live synchronized clock updates
+      function tick() {
+        const dateElement = document.getElementById("date");
+        const currentDate = new Date();
+        
+        // Dec 7, 2024, 10:32:06 AM
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        const formattedDate = currentDate.toLocaleDateString('en-US', options).replace(',', ''); 
+        const formattedTime = currentDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        dateElement.textContent = `${formattedDate}, ${formattedTime}`;
+
+        // Increment ticking sequence
+        elapsedSeconds++;
+
+        // Update "Time Since Activation" (counts UP)
+        const hUp = Math.floor(elapsedSeconds / 3600);
+        const mUp = Math.floor((elapsedSeconds % 3600) / 60);
+        const sUp = Math.floor(elapsedSeconds % 60);
+        document.getElementById("date-active").textContent = `${padZero(hUp)}:${padZero(mUp)}:${padZero(sUp)}`;
+
+        // Update "Countdown" (counts DOWN from 24 Hours)
+        const totalSecondsInDay = 86400; // 24 hours
+        let remaining = totalSecondsInDay - elapsedSeconds;
+        if(remaining < 0) remaining = 0;
+        const hDown = Math.floor(remaining / 3600);
+        const mDown = Math.floor((remaining % 3600) / 60);
+        const sDown = Math.floor(remaining % 60);
+        document.getElementById('valid-time').textContent = `${padZero(hDown)}:${padZero(mDown)}:${padZero(sDown)}`;
+      }
+
+      // Boot clock loop
+      setInterval(tick, 1000);
+      tick(); 
+
+      // Initialize automatic ticket numbers on first run
+      document.getElementById('disp-ticket-num').textContent = generateHeuristicTicketNumber();
+
+      /* ==============================================
+         Secret Menu & Customizer Binding
+         ============================================== */
+      const trigger = document.getElementById('secret-trigger');
+      const menu = document.getElementById('secret-menu');
+      const closeMenu = document.getElementById('close-menu');
+      const applyBtn = document.getElementById('apply-cfg');
+
+      let clickCount = 0;
+      trigger.addEventListener('click', () => {
+        clickCount++;
+        if(clickCount >= 3) {
+          menu.style.display = 'block';
+          clickCount = 0;
+        }
+        setTimeout(() => clickCount = 0, 1000);
+      });
+
+      closeMenu.addEventListener('click', () => {
+        menu.style.display = 'none';
+      });
+
+      applyBtn.addEventListener('click', () => {
+        // Text changes
+        document.getElementById('disp-route').innerText = document.getElementById('cfg-route').value;
+        document.getElementById('disp-passenger').innerText = document.getElementById('cfg-passenger').value;
+        document.getElementById('disp-pass-type').innerText = document.getElementById('cfg-pass-type').value;
+        document.getElementById('disp-status-text').innerText = document.getElementById('cfg-status').value;
+
+        // Auto-generation of ticket code
+        document.getElementById('disp-ticket-num').textContent = generateHeuristicTicketNumber();
+
+        // Brand marquee update
+        const transitTexts = document.querySelectorAll('#disp-transit');
+        transitTexts.forEach(el => el.innerText = document.getElementById('cfg-transit').value);
+
+        // Arrow Type adjustments
+        const isPass = document.getElementById('cfg-type').value === 'pass';
+        if(isPass) {
+          document.getElementById('icon-pass').classList.remove('sf-hidden');
+          document.getElementById('text-pass').classList.remove('sf-hidden');
+          document.getElementById('icon-ticket').classList.add('sf-hidden');
+          document.getElementById('text-ticket').classList.add('sf-hidden');
+        } else {
+          document.getElementById('icon-ticket').classList.remove('sf-hidden');
+          document.getElementById('text-ticket').classList.remove('sf-hidden');
+          document.getElementById('icon-pass').classList.add('sf-hidden');
+          document.getElementById('text-pass').classList.add('sf-hidden');
+        }
+
+        // Adjust relative active timeline
+        const hoursSet = parseFloat(document.getElementById('cfg-elapsed').value);
+        if(!isNaN(hoursSet)) {
+          elapsedSeconds = Math.floor(hoursSet * 3600);
+        }
+
+        // Color theme transitions
+        const hexPrimary = document.getElementById('cfg-color-primary').value;
+        const hexSecondary = document.getElementById('cfg-color-secondary').value;
+        
+        const rgbPrim = hexToRgb(hexPrimary);
+        const rgbSec = hexToRgb(hexSecondary);
+
+        document.getElementById('direction').style.backgroundColor = hexPrimary;
+        document.getElementById('direction').style.borderColor = hexPrimary;
+        document.getElementById('round').style.backgroundColor = hexPrimary;
+        document.getElementById('whiteArea').style.boxShadow = `${hexPrimary} 0px 6px 6px 0px`;
+
+        const dynStyle = document.getElementById('dynamic-theme');
+        dynStyle.innerHTML = `
+          @keyframes activatedBackground{
+            0%{background-color:rgb(${rgbPrim})}
+            50%{background-color:rgb(${rgbSec})}
+            100%{background-color:rgb(${rgbPrim})}
+          }
+          @keyframes activatedColor{
+            0%{color:rgb(${rgbPrim})}
+            50%{color:rgb(255,255,255)}
+            100%{color:rgb(${rgbPrim})}
+          }
+        `;
+
+        menu.style.display = 'none';
+        tick(); 
+      });
+    </script>
+  </body>
+</html>
