@@ -442,9 +442,17 @@
       <select id="cfg-state">
         <option value="inactive">Inactive (Grey Theme)</option>
         <option value="pending">Pending/Activating (Red Flashing)</option>
-        <option value="active-green">Active (Green Flashing)</option>
-        <option value="active-purple">Active Rollover (Purple Flashing)</option>
+        <option value="active">Active (Automatic Color by Day)</option>
         <option value="expired">Expired (Black/Grey Theme)</option>
+      </select>
+
+      <label>Colour Override</label>
+      <select id="cfg-colour-override">
+        <option value="auto">Automatic (Day-Based)</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="pink">Pink</option>
+        <option value="purple">Purple</option>
       </select>
 
       <label>Transit Brand Name</label>
@@ -507,7 +515,6 @@
     <script type="text/javascript">
       // State declarations
       let currentStage = 'inactive'; // 'inactive', 'pending', 'activated', 'expired'
-      let isPurpleRollover = false;
       let delaySec = 5 * 60; // default 5 mins
       let validSec = 4 * 60 * 60; // default 4 hrs
       let timePassed = 0; // tracking sequence counters
@@ -541,11 +548,57 @@
         return `${pad(h)}:${pad(m)}:${pad(s)}`;
       }
 
+      function getDaySchedule(date) {
+        const daySchedule = {
+          0: { theme: 'green', prefix: 'MZ' },
+          1: { theme: 'blue', prefix: 'FX' },
+          2: { theme: 'pink', prefix: 'MZ' },
+          3: { theme: 'green', prefix: 'MZ' },
+          4: { theme: 'blue', prefix: 'FX' },
+          5: { theme: 'purple', prefix: 'FX' },
+          6: { theme: 'purple', prefix: 'FX' }
+        };
+
+        return daySchedule[date.getDay()];
+      }
+
+      function getThemePrefix(theme) {
+        return (theme === 'green' || theme === 'pink') ? 'MZ' : 'FX';
+      }
+
+      function getValidationSchedule(date) {
+        const colourOverride = document.getElementById('cfg-colour-override').value;
+        if (colourOverride && colourOverride !== 'auto') {
+          return { theme: colourOverride, prefix: getThemePrefix(colourOverride) };
+        }
+
+        return getDaySchedule(date);
+      }
+
+      function getValidationClock(clock) {
+        if (currentStage === 'activated' || currentStage === 'expired') {
+          return new Date(clock.getTime() - (timePassed * 1000));
+        }
+
+        return clock;
+      }
+
+      function normalizeTicketCodePrefix(value, prefix) {
+        const rawValue = (value || '').trim();
+        const baseNumber = rawValue.replace(/^[A-Za-z]{2}/, '');
+
+        return `${prefix}${baseNumber}`;
+      }
+
+      function syncTicketPrefix(prefix) {
+        const normalizedCode = normalizeTicketCodePrefix(document.getElementById('cfg-ticket-num').value, prefix);
+        document.getElementById('cfg-ticket-num').value = normalizedCode;
+        document.getElementById('ticketNumber').textContent = normalizedCode;
+      }
+
       // Pseudo-random e-ticket generator
       function makeTicketCode() {
-        const route = document.getElementById('cfg-route').value;
-        const transit = document.getElementById('cfg-transit').value;
-        const prefix = route.toUpperCase().includes('UP') || transit.toUpperCase().includes('UP') ? 'UP' : 'MZ';
+        const prefix = getValidationSchedule(getValidationClock(getActiveClock())).prefix;
         const num = Math.floor(Math.random() * 90000000) + 10000000;
         return prefix + num;
       }
@@ -579,11 +632,19 @@
           return { primary: 'rgb(238, 72, 50)', secondary: 'rgb(130, 20, 10)' };
         }
 
+        if (theme === 'blue') {
+          return { primary: 'rgb(46, 77, 235)', secondary: 'rgb(23, 39, 118)' };
+        }
+
+        if (theme === 'pink') {
+          return { primary: 'rgb(222, 33, 134)', secondary: 'rgb(111, 17, 67)' };
+        }
+
         if (theme === 'purple') {
           return { primary: 'rgb(80, 73, 132)', secondary: 'rgb(40, 37, 66)' };
         }
 
-        return { primary: 'rgb(38,108,47)', secondary: 'rgb(20,56,24)' };
+        return { primary: 'rgb(44, 133, 20)', secondary: 'rgb(22, 67, 10)' };
       }
 
       // Reconstructed dynamic style overrides
@@ -608,7 +669,11 @@
       // Re-evaluation logic
       function renderActiveState() {
         const clock = getActiveClock();
+        const validationClock = getValidationClock(clock);
+        const validationSchedule = getValidationSchedule(validationClock);
+        const validationColors = getThemeColors(validationSchedule.theme);
         document.getElementById('date').textContent = formatOriginalSpecDate(clock);
+        syncTicketPrefix(validationSchedule.prefix);
 
         // Core class list generation ensuring layout classes are strictly preserved [1]
         const classes = ['ticket'];
@@ -686,14 +751,12 @@
           document.getElementById('valid-time').textContent = parseDuration(remainingDelay);
         } 
         else if (currentStage === 'activated') {
-          const activeTheme = isPurpleRollover ? 'purple' : 'green';
-          const activeColors = getThemeColors(activeTheme);
-          setupFlashingAnimations(activeTheme, 'activated');
+          setupFlashingAnimations(validationSchedule.theme, 'activated');
 
-          directionContainer.style.backgroundColor = activeColors.primary;
-          directionContainer.style.borderColor = activeColors.primary;
-          roundEl.style.backgroundColor = activeColors.primary;
-          whiteAreaEl.style.boxShadow = `0 6px 6px 0px ${activeColors.primary}`;
+          directionContainer.style.backgroundColor = validationColors.primary;
+          directionContainer.style.borderColor = validationColors.primary;
+          roundEl.style.backgroundColor = validationColors.primary;
+          whiteAreaEl.style.boxShadow = `0 6px 6px 0px ${validationColors.primary}`;
 
           document.getElementById('status-inactive').style.display = 'none';
           document.getElementById('status-pending').style.display = 'none';
@@ -759,6 +822,7 @@
         const cache = localStorage.getItem('director_state');
         if (cache) {
           const config = JSON.parse(cache);
+          const normalizedPreset = (config.statePreset === 'active-green' || config.statePreset === 'active-purple') ? 'active' : config.statePreset;
           document.getElementById('cfg-transit').value = config.transitName;
           document.getElementById('cfg-route').value = config.routeText;
           document.getElementById('cfg-ticket-num').value = config.ticketCode;
@@ -768,9 +832,10 @@
           document.getElementById('cfg-pass-type').value = config.passengerBreakdown;
           document.getElementById('cfg-delay-min').value = config.delayDurationMin;
           document.getElementById('cfg-valid-hrs').value = config.validDurationHrs;
+          document.getElementById('cfg-colour-override').value = config.colourOverride || 'auto';
           document.getElementById('cfg-clock').value = config.clockModeSelect;
           document.getElementById('cfg-base-time').value = config.clockBaseVal;
-          document.getElementById('cfg-state').value = config.statePreset;
+          document.getElementById('cfg-state').value = normalizedPreset;
           currentStage = config.stageState || 'inactive';
           timePassed = config.stageElapsed || 0;
         }
@@ -788,6 +853,7 @@
           passengerBreakdown: document.getElementById('cfg-pass-type').value,
           delayDurationMin: document.getElementById('cfg-delay-min').value,
           validDurationHrs: document.getElementById('cfg-valid-hrs').value,
+          colourOverride: document.getElementById('cfg-colour-override').value,
           clockModeSelect: document.getElementById('cfg-clock').value,
           clockBaseVal: document.getElementById('cfg-base-time').value,
           statePreset: document.getElementById('cfg-state').value,
@@ -844,25 +910,21 @@
         }
 
         const preset = document.getElementById('cfg-state').value;
-        isPurpleRollover = false;
         if (preset === 'inactive') {
           currentStage = 'inactive';
           timePassed = 0;
         } else if (preset === 'pending') {
           currentStage = 'pending';
           timePassed = 0;
-        } else if (preset === 'active-green') {
-          currentStage = 'activated';
+        } else if (preset === 'active' || preset === 'active-green' || preset === 'active-purple') {
           timePassed = 0;
-        } else if (preset === 'active-purple') {
           currentStage = 'activated';
-          isPurpleRollover = true;
-          timePassed = 0;
         } else if (preset === 'expired') {
           currentStage = 'expired';
           timePassed = validSec;
         }
 
+        syncTicketPrefix(getValidationSchedule(getValidationClock(getActiveClock())).prefix);
         saveSettings();
         renderActiveState();
       }
