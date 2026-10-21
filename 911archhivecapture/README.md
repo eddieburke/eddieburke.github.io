@@ -17,18 +17,18 @@ A small, static, **local-first** app for cataloging source links, context, media
 
 A site hosted at `github.io` cannot access, save, copy, or reuse cookies belonging to Facebook, Instagram, LinkedIn, or another website. Those sites commonly block embedding and cross-origin requests too. This project does **not** attempt to bypass those protections.
 
-For pages you can see while signed in, install the companion extension in [`extension/`](extension/README.md) and put its extension ID in **Repository**. Then **Open & auto-capture with helper** opens the supplied URL in an ordinary browser tab. The site itself receives the browser’s normal session request; after it renders, the helper returns a reviewable metadata and media-reference record to the app. The helper does not read cookies and does not defeat a site’s sign-in, access, or download controls.
+For pages you can see while signed in, install the companion extension in [`extension/`](extension/README.md) by running **Install.cmd** on Windows (Node.js 22+ required). The helper connects automatically, without entering an extension ID. Then **Open & auto-capture with helper** opens the supplied URL in an ordinary browser tab. The site itself receives the browser’s normal session request; after it renders, the helper returns a reviewable metadata and media-reference record to the app. The helper does not read cookies and does not defeat a site’s sign-in, access, or download controls.
 
 ## Mobile use
 
-The catalog itself works as a GitHub Pages PWA on a phone and keeps its local records there. Mobile Safari and Chrome on Android/iOS do not permit a web app to borrow another site’s cookies or install this Chromium helper, so automatic page extraction is desktop Chromium-only. On a phone, open or share the source normally, then add its URL and details manually (or import a capture made on desktop).
+The catalog itself works as a GitHub Pages PWA on a phone and keeps its local records there. Mobile Safari and Chrome on Android/iOS do not permit a web app to borrow another site’s cookies or install this Chromium helper, so this installer targets desktop Chrome, Edge, and Firefox. On a phone, open or share the source normally, then add its URL and details manually (or import a capture made on desktop).
 
 ## Deploy to GitHub Pages
 
 1. Create a new GitHub repository and upload these files. Keep `index.html` at the repository root.
 2. In **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save.
 3. Visit `https://YOUR-USER.github.io/YOUR-REPOSITORY/`.
-4. In the app, optionally configure that `owner/repository` under **Repository**. For browser-driven automatic capture, load the `extension` folder unpacked, copy its ID from `chrome://extensions`, and enter it there too. Use **Import & export** to download a catalog backup frequently.
+4. In the app, optionally configure that `owner/repository` under **Repository**. For browser-driven automatic capture, run `Install.cmd` to launch Chrome, Edge, and Firefox with the helper already loaded in separate test profiles. Keep the installer running; export test records before closing these temporary sessions. Use **Import & export** to download a catalog backup frequently.
 5. To publish records, either commit `archive-pocket-catalog-YYYY-MM-DD.json` to `data/archive.json` yourself or use the one-time sync control with a fine-grained token that has only **Contents: Read and write** for this repository.
 
 GitHub Pages and public Git repositories are not private storage. Do not commit private material, sensitive personal information, or content you do not have the right to publish.

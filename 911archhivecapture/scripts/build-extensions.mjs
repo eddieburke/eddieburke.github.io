@@ -9,12 +9,12 @@ export async function buildExtensions() {
   for (const browser of ['chrome', 'edge', 'firefox']) {
     const output = join(root, 'dist', browser);
     await mkdir(output, { recursive: true });
-    for (const file of ['background.js', 'bridge.js', 'content.js', 'popup.js', 'popup.html', 'popup.css', 'icons']) await cp(join(source, file), join(output, file), { recursive: true });
+    for (const file of ['background.js', 'bridge.js', 'extract.js', 'content.js', 'popup.js', 'popup.html', 'popup.css', 'icons']) await cp(join(source, file), join(output, file), { recursive: true });
     const manifest = structuredClone(base);
     if (browser === 'firefox') {
       manifest.background = { scripts: ['background.js'] };
       delete manifest.externally_connectable;
-      manifest.browser_specific_settings = { gecko: { id: 'capture-helper@archive-pocket.local', strict_min_version: '140.0', data_collection_permissions: { required: ['none'] } } };
+      manifest.browser_specific_settings = { gecko: { id: 'capture-helper@archive-pocket.local', strict_min_version: '142.0', data_collection_permissions: { required: ['none'] } } };
     }
     await writeFile(join(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   }

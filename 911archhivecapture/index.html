@@ -58,17 +58,17 @@
           <form id="captureForm" class="capture-card">
             <div class="card-heading"><div><p class="eyebrow">01 · SOURCE</p><h3>Where is it from?</h3></div><span class="step">Required</span></div>
             <label class="field full"><span>Original URL</span><div class="url-input"><input id="sourceUrl" name="sourceUrl" type="url" placeholder="Paste a post, page, image or video link" required autocomplete="url" /><button type="button" id="openSource" title="Open the source in a new tab">↗</button></div><small id="urlHint">Use the original link whenever possible.</small></label>
-            <div class="source-capture-row"><button type="button" class="secondary-button" id="autoCapture">Open &amp; auto-capture with helper <span>↗</span></button><small id="captureStatus" aria-live="polite">Requires the helper in desktop Chrome, Edge, or Brave.</small></div>
+            <div class="source-capture-row"><button type="button" class="secondary-button" id="autoCapture">Open &amp; auto-capture with helper <span>↗</span></button><small id="captureStatus" aria-live="polite">Requires the helper in desktop Chrome, Edge, Firefox, or Brave.</small></div>
             <div class="quick-sources" aria-label="Recognized sources"><span>Recognizes</span><span>archive.org</span><span>Wayback</span><span>Facebook</span><span>Instagram</span><span>Threads</span><span>LinkedIn</span><span>and more</span></div>
             <div class="form-divider"></div>
             <div class="card-heading compact"><div><p class="eyebrow">02 · DESCRIPTION</p><h3>What should this be called?</h3></div><button type="button" id="extractPasted" class="subtle-button">Parse pasted page data</button></div>
             <div class="two-columns">
-              <label class="field"><span>Title or description</span><input id="title" name="title" placeholder="e.g., Radio Mookie / Trade Center" /></label>
+              <label class="field"><span>Post / page title</span><input id="title" name="title" placeholder="First sentence of the post, or a page title" /></label>
               <label class="field"><span>Person / account</span><input id="person" name="person" placeholder="e.g., Jennifer Porter" /></label>
-              <label class="field"><span>Date posted</span><input id="postedDate" name="postedDate" type="date" /></label>
+              <label class="field"><span>Date posted</span><input id="postedDate" name="postedDate" type="date" /><small id="postedDateDetail"></small></label>
               <label class="field"><span>Source type</span><select id="sourceType" name="sourceType"><option value="other">Other / website</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="threads">Threads</option><option value="linkedin">LinkedIn</option><option value="archive">Internet Archive</option><option value="wayback">Wayback Machine</option></select></label>
             </div>
-            <label class="field full"><span>Notes</span><textarea id="notes" name="notes" rows="3" placeholder="Why it matters, what is shown, transcription, provenance…"></textarea></label>
+            <label class="field full"><span>Post text / notes</span><textarea id="notes" name="notes" rows="6" placeholder="Full post text, then your notes or provenance…"></textarea></label>
             <label class="field full"><span>Tags <small>separate with commas</small></span><input id="tags" name="tags" placeholder="family history, event, 2001" /></label>
             <div class="form-actions"><button type="reset" class="text-button">Clear form</button><button class="primary-button" type="submit">Save capture <span>→</span></button></div>
           </form>
@@ -99,7 +99,7 @@
             <div class="two-columns"><label class="field"><span>Branch</span><input id="repoBranch" value="main" /></label><label class="field"><span>Catalog file path</span><input id="repoPath" value="data/archive.json" /></label></div>
             <label class="field full"><span>Media folder <small>for reference only</small></span><input id="mediaPath" value="media" /><small>When you upload media through GitHub, use this folder and paste the generated Raw URL into a record.</small></label>
             <div class="form-divider"></div>
-            <label class="field full"><span>Capture Helper extension ID <small>optional · enables Open &amp; auto-capture</small></span><input id="extensionId" autocomplete="off" placeholder="32-character ID from chrome://extensions" /><small>Install the unpacked helper, enable Developer mode, copy its ID, then save. The extension receives only the URL you explicitly send to it.</small></label>
+            <label class="field full"><span>Capture Helper extension ID <small>optional · legacy Chromium connection</small></span><input id="extensionId" autocomplete="off" placeholder="32-character ID from chrome://extensions" /><small>Run Install.cmd for automatic Chrome, Edge, and Firefox testing. The helper connects automatically; no ID is required. The extension receives only the URL you explicitly send.</small></label>
             <div class="form-actions"><button type="submit" class="secondary-button">Save repository settings</button></div>
           </form>
           <section class="settings-card sync-card"><p class="eyebrow">ONE-TIME SYNC</p><h3>Write the catalog JSON to GitHub</h3><p>Paste a <b>fine-grained</b> GitHub token with Contents read/write permission for this one repository. It is used only for this request and is never saved.</p><label class="field"><span>Temporary GitHub token</span><input id="githubToken" type="password" autocomplete="off" placeholder="github_pat_…" /></label><button id="syncGithub" class="primary-button" type="button">Sync catalog to GitHub <span>↗</span></button><small id="syncStatus" aria-live="polite">This sync writes record metadata only, not local files.</small></section>

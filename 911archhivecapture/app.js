@@ -140,7 +140,7 @@
       id: raw.id || id(), sourceUrl, sourceType: Object.prototype.hasOwnProperty.call(sourceNames, raw.sourceType) ? raw.sourceType : inferred.sourceType,
       title: String(raw.title || raw.headline || inferred.title || 'Untitled capture').trim().slice(0, 500),
       person: String(raw.person || raw.author || raw.account || inferred.person || '').trim().slice(0, 300),
-      postedDate, notes: String(raw.notes || raw.description || '').trim().slice(0, 10000),
+      postedDate, postedDateText: String(raw.postedDateText || '').trim().slice(0, 300), notes: String(raw.notes || raw.description || '').trim().slice(0, 10000),
       tags: tags.map(x => String(x).trim().replace(/^#/, '')).filter(Boolean).slice(0, 25),
       media: normalizeMedia(raw.media || raw.images || raw.image),
       capturedAt, updatedAt: new Date().toISOString(),
@@ -295,6 +295,8 @@
     if (capture.title) $('#title').value = capture.title;
     if (capture.person) $('#person').value = capture.person;
     if (capture.postedDate && /^\d{4}-\d{2}-\d{2}$/.test(capture.postedDate)) $('#postedDate').value = capture.postedDate;
+    $('#postedDateDetail').textContent = capture.postedDateText || '';
+    $('#postedDateDetail').dataset.date = capture.postedDate || '';
     if (capture.notes) $('#notes').value = capture.notes;
     if (Array.isArray(capture.tags) && capture.tags.length) $('#tags').value = capture.tags.join(', ');
     const media = [...new Set((capture.media || []).map(validUrl).filter(Boolean))];
@@ -333,7 +335,7 @@
     const media = (() => { try { return JSON.parse($('#captureForm').dataset.parsedMedia || '[]'); } catch { return []; } })();
     return normalizeEntry({
       sourceUrl, sourceType: $('#sourceType').value || inferred.sourceType, title: $('#title').value || inferred.title,
-      person: $('#person').value || inferred.person, postedDate: $('#postedDate').value, notes: $('#notes').value,
+      person: $('#person').value || inferred.person, postedDate: $('#postedDate').value, postedDateText: $('#postedDateDetail').dataset.date === $('#postedDate').value ? $('#postedDateDetail').textContent : '', notes: $('#notes').value,
       tags: $('#tags').value, media, capturedAt: new Date().toISOString(), captureMethod: media.length ? 'pasted-metadata' : 'manual'
     });
   }
@@ -374,6 +376,7 @@
     const entry = state.entries.find(e => e.id === entryId); if (!entry) return;
     $('#entryDialog').close(); setView('add');
     $('#sourceUrl').value = entry.sourceUrl; $('#sourceType').value = entry.sourceType; $('#title').value = entry.title; $('#person').value = entry.person; $('#postedDate').value = entry.postedDate; $('#notes').value = entry.notes; $('#tags').value = entry.tags.join(', ');
+    $('#postedDateDetail').textContent = entry.postedDateText || ''; $('#postedDateDetail').dataset.date = entry.postedDate || '';
     $('#captureForm').dataset.editingId = entry.id; $('#captureForm').dataset.parsedMedia = JSON.stringify(entry.media.filter(m => m.type === 'remote').map(m => m.url));
     $('#captureForm button[type="submit"]').innerHTML = 'Update capture <span>→</span>'; toast('Editing existing capture. Local media will be kept.');
   }
@@ -447,7 +450,7 @@
   function wireEvents() {
     $$('.nav-item').forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
     $$('[data-go]').forEach(button => button.addEventListener('click', () => setView(button.dataset.go)));
-    $('#headerAdd').addEventListener('click', () => { $('#captureForm').reset(); delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; setView('add'); $('#sourceUrl').focus(); });
+    $('#headerAdd').addEventListener('click', () => { $('#captureForm').reset(); delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; setView('add'); $('#sourceUrl').focus(); });
     $('#mobileMenu').addEventListener('click', () => $('.sidebar').classList.toggle('open'));
     $('#aboutButton').addEventListener('click', () => $('#aboutDialog').showModal());
     $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
@@ -470,9 +473,10 @@
     });
     $('#openSource').addEventListener('click', () => { const url = validUrl($('#sourceUrl').value); if (url) window.open(url, '_blank', 'noopener'); else toast('Paste a valid source URL first.'); });
     $('#autoCapture').addEventListener('click', autoCaptureWithHelper);
+    $('#postedDate').addEventListener('change', () => { $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; });
     $('#openPasteModal').addEventListener('click', () => $('#pasteDialog').showModal()); $('#extractPasted').addEventListener('click', () => $('#pasteDialog').showModal());
     $('#parsePasted').addEventListener('click', () => { const text = $('#htmlPaste').value.trim(); if (!text) return toast('Paste some HTML or page text first.'); applyParsed(parsePastedContent(text)); $('#pasteDialog').close(); });
-    $('#captureForm').addEventListener('reset', () => setTimeout(() => { delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; $('#urlHint').textContent = 'Use the original link whenever possible.'; setCaptureStatus('Requires the helper in desktop Chrome, Edge, or Brave.'); }, 0));
+    $('#captureForm').addEventListener('reset', () => setTimeout(() => { delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; $('#urlHint').textContent = 'Use the original link whenever possible.'; setCaptureStatus('Requires the helper in desktop Chrome, Edge, Firefox, or Brave.'); }, 0));
     $('#captureForm').addEventListener('submit', async event => {
       event.preventDefault(); const url = validUrl($('#sourceUrl').value); if (!url) return toast('A valid original URL is required.');
       const record = entryFromForm(); const editing = $('#captureForm').dataset.editingId;

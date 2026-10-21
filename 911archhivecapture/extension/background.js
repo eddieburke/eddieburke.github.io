@@ -43,7 +43,11 @@ async function receivePicker(message) {
     const media = Array.isArray(next.media) ? next.media : [];
     if (message.value && !media.includes(message.value)) media.unshift(message.value);
     next.media = media;
-  } else if (message.field && message.value) next[message.field] = message.value;
+  } else if (message.field && message.value) {
+    next[message.field] = message.value;
+    next.manualFields = [...new Set([...(next.manualFields || []), message.field])];
+    if (message.field === 'postedDate') next.postedDateText = message.postedDateText || message.value;
+  }
   await chrome.storage.local.set({ [DRAFT_KEY]: next });
   return { ok: true };
 }
