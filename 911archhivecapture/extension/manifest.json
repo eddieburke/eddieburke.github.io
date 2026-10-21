@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Archive Pocket Capture Helper",
   "version": "1.3.0",
-  "description": "Open a source in your browser and return reviewable metadata to Archive Pocket.",
+  "description": "Capture page text, author, date and media URLs.",
   "action": { "default_title": "Capture for Archive Pocket", "default_popup": "popup.html" },
   "background": { "service_worker": "background.js" },
   "permissions": ["activeTab", "scripting", "storage", "downloads", "tabs"],

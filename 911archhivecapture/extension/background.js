@@ -1,7 +1,7 @@
-// Archive Pocket Capture Helper background service worker.
-// The auto-capture workflow exists entirely inside the user's browser:
-// a github.io Archive Pocket page asks us to open one URL; only that new tab's
-// rendered metadata is accepted; the result is returned to that same app page.
+
+
+
+
 const AUTO_CAPTURE_KEY = 'archivePocketAutoCapture';
 const DRAFT_KEY = 'draft';
 
@@ -13,7 +13,7 @@ async function startAutoCapture(sourceUrl, sender) {
   let url;
   try { url = new URL(sourceUrl); } catch { throw new Error('The source URL is invalid.'); }
   if (!/^https?:$/.test(url.protocol)) throw new Error('Only http(s) source URLs can be opened.');
-  // Create a blank tab first so the pending request is stored before the source begins loading.
+
   const tab = await chrome.tabs.create({ url: 'about:blank', active: true });
   const capture = { requestId: requestId(), tabId: tab.id, ownerTabId: sender.tab.id, ownerOrigin: new URL(sender.url).origin, requestedUrl: url.href, state: 'pending', startedAt: Date.now() };
   await setAutoCapture(capture);
@@ -29,7 +29,7 @@ async function receivePageCapture(pageCapture, sender) {
   const active = await getAutoCapture();
   if (!active || active.tabId !== sender.tab?.id || sender.frameId !== 0 || Date.now() - active.startedAt > 60000 || !['pending', 'complete'].includes(active.state)) return { ignored: true };
   const incoming = { ...pageCapture, sourceUrl: sender.tab.url || pageCapture.sourceUrl, capturedAt: new Date().toISOString(), captureMethod: 'browser-helper-auto' };
-  // A dynamic page may report more than once. Keep whichever reading is richer.
+
   const existing = active.capture || {};
   const capture = captureScore(incoming) >= captureScore(existing) ? incoming : existing;
   await setAutoCapture({ ...active, state: 'complete', capture, completedAt: Date.now() });

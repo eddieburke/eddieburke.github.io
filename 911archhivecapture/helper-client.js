@@ -9,7 +9,7 @@
         if (event.data.error) reject(new Error(event.data.error));
         else resolve(event.data.response || {});
       };
-      const timer = setTimeout(() => { cleanup(); reject(new Error('Capture Helper is not connected. Run Install.cmd, load the helper in your normal browser profile, then refresh this page.')); }, timeout);
+      const timer = setTimeout(() => { cleanup(); reject(new Error('Helper not connected. Load the extension and refresh this page.')); }, timeout);
       window.addEventListener('message', receive);
       window.postMessage({ channel: 'archive-pocket-helper-request', id, message }, location.origin);
     });

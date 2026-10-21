@@ -1,6 +1,6 @@
-// Runs on pages so the helper can react after Archive Pocket explicitly opens a URL.
-// It first asks the extension background whether THIS tab is an active capture target;
-// it does not inspect page metadata unless the answer is yes.
+
+
+
 if (!globalThis.__archivePocketCaptureV2) {
   globalThis.__archivePocketCaptureV2 = true;
   const extract = globalThis.ArchivePocketExtract;
@@ -105,8 +105,8 @@ if (!globalThis.__archivePocketCaptureV2) {
   function tryAutomaticCapture() {
     chrome.runtime.sendMessage({ type: 'archive-pocket-check-auto' }, response => {
       if (chrome.runtime.lastError || !response?.capture) return;
-      // Social and single-page apps often fill metadata after document_idle. Report twice;
-      // the background keeps the more complete of the two readings.
+
+
       setTimeout(() => readPage().then(capture => chrome.runtime.sendMessage({ type: 'archive-pocket-page-read', capture })).catch(console.error), 1500);
       setTimeout(() => readPage().then(capture => chrome.runtime.sendMessage({ type: 'archive-pocket-page-read', capture })).catch(console.error), 4300);
     });

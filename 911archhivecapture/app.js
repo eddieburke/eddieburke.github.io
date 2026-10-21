@@ -1,6 +1,3 @@
-/* Archive Pocket — a dependency-free, local-first catalog.
-   Records live in IndexedDB. Settings are localStorage. No cookies, account data,
-   or page content is sent anywhere unless the user chooses GitHub Sync. */
 (() => {
   'use strict';
 
@@ -78,8 +75,8 @@
     let person = '';
     try {
       const u = new URL(sourceUrl);
-      // A common Wayback convention appends a human title after a colon:
-      // .../page.html:Radio_mookie
+
+
       const finalColon = sourceUrl.lastIndexOf(':');
       const afterProtocol = sourceUrl.indexOf('//') + 2;
       if (finalColon > afterProtocol && finalColon > sourceUrl.lastIndexOf('/')) {
@@ -102,7 +99,7 @@
         const match = u.pathname.match(/^\/([^/]+)\/posts\//);
         if (match && !/^\d+$/.test(match[1])) person = match[1].replace(/[_-]+/g, ' ');
       }
-    } catch { /* already validated */ }
+    } catch {  }
     return { sourceType, title: sentenceCase(title), person: sentenceCase(person) };
   }
   function sentenceCase(text) {
@@ -180,12 +177,10 @@
 
   function updateCounts() {
     $('#entryCount').textContent = state.entries.length;
-    const local = state.entries.filter(e => e.media.some(m => m.type === 'local')).length;
-    $('#statsRow').innerHTML = state.entries.length ? `<span class="stat"><b>${state.entries.length}</b> capture${state.entries.length === 1 ? '' : 's'}</span><span class="stat"><b>${new Set(state.entries.map(e => e.sourceType)).size}</b> source types</span>${local ? `<span class="stat"><b>${local}</b> with local media</span>` : ''}` : '';
   }
   function updateTransferInfo() {
     const localCount = state.entries.reduce((sum, e) => sum + e.media.filter(m => m.type === 'local').length, 0);
-    $('#exportInfo').textContent = state.entries.length ? `${state.entries.length} record${state.entries.length === 1 ? '' : 's'}${localCount ? ` · ${localCount} local file${localCount === 1 ? '' : 's'} not included` : ''}` : 'No records yet';
+    $('#exportInfo').textContent = state.entries.length ? `${state.entries.length} record${state.entries.length === 1 ? '' : 's'}${localCount ? ` · ${localCount} local file${localCount === 1 ? '' : 's'} not included` : ''}` : '0 records';
   }
 
   function firstMedia(entry) { return (entry.media || []).find(m => (m.type === 'local' && state.assetUrls.get(m.assetId)) || (m.type !== 'local' && m.url)); }
@@ -206,7 +201,7 @@
     const grid = $('#entryGrid');
     $('#emptyLibrary').hidden = state.entries.length > 0;
     if (!entries.length) {
-      grid.innerHTML = state.entries.length ? `<div class="empty-state"><div class="empty-glyph">⌕</div><h2>No matching captures.</h2><p>Try removing a filter or searching for another word.</p></div>` : '';
+      grid.innerHTML = state.entries.length ? `<p class="empty-state">No matches.</p>` : '';
       return;
     }
     grid.innerHTML = entries.map(entry => {
@@ -214,21 +209,29 @@
       const tags = entry.tags.slice(0, 3).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
       return `<article class="entry-card" data-entry-id="${escapeHtml(entry.id)}" tabindex="0" role="button" aria-label="Open ${escapeHtml(entry.title)}">
         <div class="entry-image">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(media?.alt || '')}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'image-empty\'>⌑</div>'">` : `<div class="image-empty">⌑</div>`}<span class="source-chip">${escapeHtml(sourceNames[entry.sourceType])}</span></div>
-        <div class="entry-body"><div class="entry-heading"><h3>${escapeHtml(entry.title)}</h3><button class="entry-menu" data-open-entry="${escapeHtml(entry.id)}" aria-label="Open capture">⋯</button></div>
+        <div class="entry-body"><div class="entry-heading"><h3>${escapeHtml(entry.title)}</h3></div>
         ${entry.person ? `<p class="entry-person">${escapeHtml(entry.person)}</p>` : '<span></span>'}
         <div class="entry-meta"><span>${escapeHtml(displayDate(entry.postedDate, 'Date unknown'))}</span><span>${escapeHtml(shortHost(entry.sourceUrl))}</span></div>${tags ? `<div class="tag-list">${tags}</div>` : ''}</div></article>`;
     }).join('');
   }
 
   function setView(view) {
+    view = view === 'add' ? 'add' : 'library';
     state.currentView = view;
-    const labels = { library: ['YOUR ARCHIVE', 'Library'], add: ['NEW RECORD', 'New capture'], imports: ['PORTABLE DATA', 'Import & export'], settings: ['ARCHIVE SETTINGS', 'Repository'] };
-    $$('.view').forEach(el => el.classList.remove('active-view'));
-    $(`#${view}View`).classList.add('active-view');
-    $$('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
-    $('#viewEyebrow').textContent = labels[view][0]; $('#viewTitle').textContent = labels[view][1];
-    $('.sidebar').classList.remove('open');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    $$('.view').forEach(el => el.classList.toggle('active-view', el.id === `${view}View`));
+    $$('.nav-item').forEach(el => {
+      const active = el.dataset.view === view;
+      el.classList.toggle('active', active);
+      if (active) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
+    });
+    $('#viewTitle').textContent = view === 'library' ? 'Library' : $('#captureForm').dataset.editingId ? 'Edit capture' : 'New capture';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function newCapture() {
+    $('#captureForm').reset();
+    setView('add');
+    $('#sourceUrl').focus();
   }
 
   function parsePastedContent(rawText) {
@@ -247,9 +250,9 @@
     const imageTags = $$('meta[property="og:image"], meta[name="twitter:image"], img[src]', doc);
     result.media = imageTags.map(el => validUrl(el.content || el.src || '')).filter(Boolean).slice(0, 30);
     for (const script of $$('script[type="application/ld+json"]', doc)) {
-      try { inspectJsonLd(JSON.parse(script.textContent), result); } catch { /* invalid JSON-LD is ignored */ }
+      try { inspectJsonLd(JSON.parse(script.textContent), result); } catch {  }
     }
-    // Useful when someone has pasted a copied text card instead of the source HTML.
+
     if (!result.person) { const author = rawText.match(/(?:by|author)\s*[:\-]?\s*@?([^\n|•]{2,80})/i); if (author) result.person = author[1].trim(); }
     if (!result.postedDate) { const date = rawText.match(/\b(20\d{2}[-/]\d{1,2}[-/]\d{1,2})\b/); if (date) result.postedDate = date[1].replaceAll('/', '-'); }
     return result;
@@ -275,7 +278,7 @@
     if (result.notes) $('#notes').value = result.notes;
     $('#captureForm').dataset.parsedMedia = JSON.stringify([...new Set(result.media)].slice(0, 30));
     const suffix = result.media.length ? ` and ${result.media.length} image link${result.media.length === 1 ? '' : 's'}` : '';
-    toast(`Details parsed${suffix}. Review before saving.`);
+    toast(`Extracted${suffix}.`);
   }
 
   function helperMessage(extensionId, message) {
@@ -301,8 +304,8 @@
     if (Array.isArray(capture.tags) && capture.tags.length) $('#tags').value = capture.tags.join(', ');
     const media = [...new Set((capture.media || []).map(validUrl).filter(Boolean))];
     $('#captureForm').dataset.parsedMedia = JSON.stringify(media);
-    $('#urlHint').textContent = `${sourceNames[sourceType]} details were captured from the browser tab.`;
-    setCaptureStatus(`Captured ${media.length} media reference${media.length === 1 ? '' : 's'}. Review fields, then save.`);
+    $('#urlHint').textContent = sourceNames[sourceType];
+    setCaptureStatus(`Captured ${media.length} media URL${media.length === 1 ? '' : 's'}.`);
   }
   const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
   async function autoCaptureWithHelper() {
@@ -310,22 +313,22 @@
     if (!sourceUrl) return toast('Paste a valid source URL first.');
     const settings = getSettings();
     try {
-      setCaptureStatus('Opening the source in your browser…', true);
+      setCaptureStatus('Opening source…', true);
       const start = await helperMessage(settings.extensionId, { type: 'archive-pocket-open-capture', sourceUrl });
       if (!start.requestId) throw new Error(start.error || 'The helper did not start a capture.');
       for (let attempt = 0; attempt < 45; attempt++) {
         await pause(1000);
         const status = await helperMessage(settings.extensionId, { type: 'archive-pocket-capture-status', requestId: start.requestId });
         if (status.state === 'complete' && status.capture) {
-          applyHelperCapture(status.capture); toast('Source details captured from your browser tab.'); return;
+          applyHelperCapture(status.capture); toast('Captured.'); return;
         }
         if (status.state === 'failed' || status.state === 'missing') throw new Error(status.error || 'The source page could not be read.');
         setCaptureStatus(`Waiting for the page to load… ${attempt + 1}s`, true);
       }
       throw new Error('Timed out. The source may block extensions or still be loading.');
     } catch (error) {
-      setCaptureStatus(`Auto-capture unavailable: ${error.message}`);
-      toast('Auto-capture could not finish. You can still use the manual helper.');
+      setCaptureStatus(`Capture failed: ${error.message}`);
+      toast('Capture failed.');
     } finally { $('.source-capture-row').classList.remove('capturing'); $('#autoCapture').disabled = false; }
   }
 
@@ -345,13 +348,13 @@
     const dialog = $('#entryDialog');
     const primary = firstMedia(entry); const primaryUrl = mediaUrl(primary || {});
     const media = entry.media || [];
-    $('#entryDialogContent').innerHTML = `<div class="detail-hero">${primaryUrl ? `<img src="${escapeHtml(primaryUrl)}" alt="${escapeHtml(primary?.alt || '')}">` : '<div class="image-empty">⌑</div>'}</div>
-      <div class="detail-body"><div class="detail-top"><div><p class="eyebrow">${escapeHtml(sourceNames[entry.sourceType])} · CAPTURED ${escapeHtml(displayDate(entry.capturedAt, 'recently'))}</p><h2>${escapeHtml(entry.title)}</h2>${entry.person ? `<p class="detail-person">${escapeHtml(entry.person)}</p>` : ''}</div><p class="detail-date">${escapeHtml(displayDate(entry.postedDate))}</p></div>
+    $('#entryDialogContent').innerHTML = `<div class="detail-hero">${primaryUrl ? `<img src="${escapeHtml(primaryUrl)}" alt="${escapeHtml(primary?.alt || '')}">` : ''}</div>
+      <div class="detail-body"><div class="detail-top"><div><p class="record-source">${escapeHtml(sourceNames[entry.sourceType])}</p><h2>${escapeHtml(entry.title)}</h2>${entry.person ? `<p class="detail-person">${escapeHtml(entry.person)}</p>` : ''}</div><p class="detail-date">${escapeHtml(entry.postedDateText || displayDate(entry.postedDate))}</p></div>
       ${entry.tags.length ? `<div class="tag-list">${entry.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
       ${entry.notes ? `<p class="detail-notes">${escapeHtml(entry.notes)}</p>` : ''}
       <a class="detail-url" target="_blank" rel="noopener noreferrer" href="${escapeHtml(entry.sourceUrl)}">↗ ${escapeHtml(entry.sourceUrl)}</a>
-      <section class="detail-media"><h3>Media references <span class="muted">(${media.length})</span></h3><div class="media-row">${media.map(m => { const url = mediaUrl(m); return url ? `<a class="media-thumb" href="${escapeHtml(url)}" target="_blank" rel="noopener"><img src="${escapeHtml(url)}" alt="${escapeHtml(m.alt || '')}"></a>` : `<span class="media-thumb"><span>Missing<br>local file</span></span>`; }).join('') || '<span class="muted">No media links yet.</span>'}</div></section>
-      <div class="detail-actions"><div class="action-set"><button class="secondary-button" data-add-url="${escapeHtml(entry.id)}">+ Media URL</button><button class="secondary-button" data-attach-file="${escapeHtml(entry.id)}">Attach image</button><button class="secondary-button" data-edit-entry="${escapeHtml(entry.id)}">Edit fields</button></div><button class="text-button" data-delete-entry="${escapeHtml(entry.id)}">Delete record</button></div></div>`;
+      <section class="detail-media"><h3>Media references <span class="muted">(${media.length})</span></h3><div class="media-row">${media.map(m => { const url = mediaUrl(m); return url ? `<a class="media-thumb" href="${escapeHtml(url)}" target="_blank" rel="noopener"><img src="${escapeHtml(url)}" alt="${escapeHtml(m.alt || '')}"></a>` : `<span class="media-thumb"><span>Missing<br>local file</span></span>`; }).join('') || '<span class="muted">No media.</span>'}</div></section>
+      <div class="detail-actions"><div class="action-set"><button class="secondary-button" data-add-url="${escapeHtml(entry.id)}">+ Media URL</button><button class="secondary-button" data-attach-file="${escapeHtml(entry.id)}">Attach image</button><button class="secondary-button" data-edit-entry="${escapeHtml(entry.id)}">Edit</button></div><button class="text-button" data-delete-entry="${escapeHtml(entry.id)}">Delete</button></div></div>`;
     dialog.showModal();
   }
 
@@ -369,23 +372,23 @@
       if (file.size > 20 * 1024 * 1024) return toast('Choose an image under 20 MB for local browser storage.');
       const entry = state.entries.find(e => e.id === entryId); if (!entry) return;
       const assetId = id('asset'); await put('assets', { id: assetId, blob: file, name: file.name, type: file.type, savedAt: new Date().toISOString() });
-      entry.media.push({ id: id('media'), type: 'local', assetId, name: file.name, alt: file.name }); await refreshAssetUrls(); await saveEntry(entry); await openEntry(entryId); toast('Local image attached. Export/upload it separately to keep it.');
+      entry.media.push({ id: id('media'), type: 'local', assetId, name: file.name, alt: file.name }); await refreshAssetUrls(); await saveEntry(entry); await openEntry(entryId); toast('Image attached. Stored in this browser only.');
     }; input.click();
   }
   async function editEntry(entryId) {
     const entry = state.entries.find(e => e.id === entryId); if (!entry) return;
-    $('#entryDialog').close(); setView('add');
+    $('#entryDialog').close();
     $('#sourceUrl').value = entry.sourceUrl; $('#sourceType').value = entry.sourceType; $('#title').value = entry.title; $('#person').value = entry.person; $('#postedDate').value = entry.postedDate; $('#notes').value = entry.notes; $('#tags').value = entry.tags.join(', ');
     $('#postedDateDetail').textContent = entry.postedDateText || ''; $('#postedDateDetail').dataset.date = entry.postedDate || '';
     $('#captureForm').dataset.editingId = entry.id; $('#captureForm').dataset.parsedMedia = JSON.stringify(entry.media.filter(m => m.type === 'remote').map(m => m.url));
-    $('#captureForm button[type="submit"]').innerHTML = 'Update capture <span>→</span>'; toast('Editing existing capture. Local media will be kept.');
+    $('#captureForm button[type="submit"]').innerHTML = 'Save changes'; setView('add');
   }
 
   function catalogExport() {
     return { format: 'archive-pocket-catalog', version: 1, exportedAt: new Date().toISOString(), notice: 'Local browser file attachments are not included. Upload them separately, then update each record with a stable URL.', entries: state.entries };
   }
   function exportCatalog() {
-    const content = JSON.stringify(catalogExport(), null, 2); downloadBlob(new Blob([content], { type: 'application/json' }), `archive-pocket-catalog-${todayISO()}.json`); toast('Catalog JSON downloaded.');
+    const content = JSON.stringify(catalogExport(), null, 2); downloadBlob(new Blob([content], { type: 'application/json' }), `archive-pocket-catalog-${todayISO()}.json`); toast('JSON exported.');
   }
   async function importJsonFile(file) {
     let data;
@@ -404,22 +407,6 @@
       await put('entries', record); const pos = state.entries.findIndex(e => e.id === record.id); if (pos < 0) state.entries.unshift(record); else state.entries[pos] = record; imported++;
     }
     renderLibrary(); updateCounts(); updateTransferInfo(); toast(`${imported} capture${imported === 1 ? '' : 's'} imported.`); setView('library');
-  }
-
-  function sampleEntries() {
-    return [
-      normalizeEntry({ sourceUrl: 'https://web.archive.org/web/20011109235801/http://www.geocities.com/radio_mookie/tradecenter.html:Radio_mookie', sourceType: 'wayback', title: 'Radio Mookie', notes: 'Example: an archived GeoCities Trade Center page. Replace this sample with your own notes and source context.', tags: ['sample', 'web archive'], postedDate: '2001-11-09', capturedAt: '2026-10-21T12:00:00.000Z' }),
-      normalizeEntry({ sourceUrl: 'https://www.facebook.com/share/1CChWPFhWs/?mibextid=wwXIfr', sourceType: 'facebook', title: 'Facebook post', person: 'Jennifer Porter', notes: 'Example social record. Use the browser helper while signed in, then review its fields before import.', tags: ['sample', 'social'], capturedAt: '2026-10-21T12:01:00.000Z' }),
-      normalizeEntry({ sourceUrl: 'https://www.facebook.com/share/1FM2iXioxT/?mibextid=wwXIfr', sourceType: 'facebook', title: 'Facebook post', person: 'Unknown', tags: ['sample', 'social'], capturedAt: '2026-10-21T12:02:00.000Z' }),
-      normalizeEntry({ sourceUrl: 'https://www.threads.com/share/BAX35waYCH/', sourceType: 'threads', title: 'Threads post', person: 'Nelson Jeng', tags: ['sample'], capturedAt: '2026-10-21T12:03:00.000Z' }),
-      normalizeEntry({ sourceUrl: 'https://www.instagram.com/p/DdFpcH3Di20/?rpxt=emlhenhyOGVhaW92', sourceType: 'instagram', title: 'Instagram post', person: 'shefuchoice', tags: ['sample', 'social'], capturedAt: '2026-10-21T12:04:00.000Z' }),
-      normalizeEntry({ sourceUrl: 'https://www.facebook.com/100003159618340/posts/28820774944277776', sourceType: 'facebook', title: 'Facebook post', person: 'adam riback', tags: ['sample', 'social'], capturedAt: '2026-10-21T12:05:00.000Z' })
-    ];
-  }
-  async function loadSamples() {
-    if (state.entries.length && !confirm('Add the six example records to your existing library?')) return;
-    for (const record of sampleEntries()) { await put('entries', record); state.entries.unshift(record); }
-    renderLibrary(); updateCounts(); updateTransferInfo(); toast('Example records added. Replace or delete them at any time.'); setView('library');
   }
 
   function settingsFromForm() { return { repoName: $('#repoName').value.trim().replace(/^https?:\/\/(?:www\.)?github\.com\//, '').replace(/\/$/, ''), repoBranch: $('#repoBranch').value.trim() || 'main', repoPath: $('#repoPath').value.trim().replace(/^\/+/, '') || 'data/archive.json', mediaPath: $('#mediaPath').value.trim().replace(/^\/+|\/+$/g, '') || 'media', extensionId: $('#extensionId').value.trim() }; }
@@ -443,16 +430,13 @@
       const response = await fetch(base, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || `GitHub returned ${response.status}`);
-      $('#githubToken').value = ''; status.textContent = `Synced at ${new Date().toLocaleTimeString()}. Token discarded.`; toast('Catalog written to your GitHub repository.');
-    } catch (error) { status.textContent = `Sync failed: ${error.message}`; toast('GitHub sync failed. See the note below the button.'); }
+      $('#githubToken').value = ''; status.textContent = `Synced at ${new Date().toLocaleTimeString()}. Token discarded.`; toast('Synced.');
+    } catch (error) { status.textContent = `Sync failed: ${error.message}`; toast('Sync failed.'); }
   }
 
   function wireEvents() {
-    $$('.nav-item').forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
-    $$('[data-go]').forEach(button => button.addEventListener('click', () => setView(button.dataset.go)));
-    $('#headerAdd').addEventListener('click', () => { $('#captureForm').reset(); delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; setView('add'); $('#sourceUrl').focus(); });
-    $('#mobileMenu').addEventListener('click', () => $('.sidebar').classList.toggle('open'));
-    $('#aboutButton').addEventListener('click', () => $('#aboutDialog').showModal());
+    $$('.nav-item').forEach(button => button.addEventListener('click', () => button.dataset.view === 'add' ? newCapture() : setView('library')));
+    $$('[data-go]').forEach(button => button.addEventListener('click', () => button.dataset.go === 'add' ? newCapture() : setView('library')));
     $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
     $$('.dialog').forEach(dialog => dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); }));
     $('#searchInput').addEventListener('input', renderLibrary); $('#sourceFilter').addEventListener('change', renderLibrary); $('#sortSelect').addEventListener('change', renderLibrary);
@@ -468,15 +452,15 @@
     });
     $('#sourceUrl').addEventListener('input', event => {
       const info = guessFromUrl(event.target.value); const hint = $('#urlHint');
-      if (validUrl(event.target.value)) { $('#sourceType').value = info.sourceType; hint.textContent = `${sourceNames[info.sourceType]} detected. ${info.title ? `Possible title: “${info.title}”.` : 'Use the extension or paste page data for full details.'}`; }
-      else hint.textContent = 'Use the original link whenever possible.';
+      if (validUrl(event.target.value)) { $('#sourceType').value = info.sourceType; hint.textContent = sourceNames[info.sourceType]; }
+      else hint.textContent = '';
     });
     $('#openSource').addEventListener('click', () => { const url = validUrl($('#sourceUrl').value); if (url) window.open(url, '_blank', 'noopener'); else toast('Paste a valid source URL first.'); });
     $('#autoCapture').addEventListener('click', autoCaptureWithHelper);
     $('#postedDate').addEventListener('change', () => { $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; });
-    $('#openPasteModal').addEventListener('click', () => $('#pasteDialog').showModal()); $('#extractPasted').addEventListener('click', () => $('#pasteDialog').showModal());
+    $('#extractPasted').addEventListener('click', () => $('#pasteDialog').showModal());
     $('#parsePasted').addEventListener('click', () => { const text = $('#htmlPaste').value.trim(); if (!text) return toast('Paste some HTML or page text first.'); applyParsed(parsePastedContent(text)); $('#pasteDialog').close(); });
-    $('#captureForm').addEventListener('reset', () => setTimeout(() => { delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; $('#captureForm button[type="submit"]').innerHTML = 'Save capture <span>→</span>'; $('#urlHint').textContent = 'Use the original link whenever possible.'; setCaptureStatus('Requires the helper in desktop Chrome, Edge, Firefox, or Brave.'); }, 0));
+    $('#captureForm').addEventListener('reset', () => { delete $('#captureForm').dataset.editingId; delete $('#captureForm').dataset.parsedMedia; $('#postedDateDetail').textContent = ''; delete $('#postedDateDetail').dataset.date; $('#captureForm button[type="submit"]').innerHTML = 'Save'; $('#urlHint').textContent = ''; setCaptureStatus(''); if (state.currentView === 'add') $('#viewTitle').textContent = 'New capture'; });
     $('#captureForm').addEventListener('submit', async event => {
       event.preventDefault(); const url = validUrl($('#sourceUrl').value); if (!url) return toast('A valid original URL is required.');
       const record = entryFromForm(); const editing = $('#captureForm').dataset.editingId;
@@ -484,7 +468,7 @@
       await saveEntry(record); $('#captureForm').reset(); toast(editing ? 'Capture updated.' : 'Capture saved locally.'); setView('library');
     });
     $('#importFile').addEventListener('change', event => { const file = event.target.files?.[0]; if (file) importJsonFile(file); event.target.value = ''; });
-    $('#exportAll').addEventListener('click', exportCatalog); $('#importSamples').addEventListener('click', loadSamples);
+    $('#exportAll').addEventListener('click', exportCatalog);
     $('#settingsForm').addEventListener('submit', event => { event.preventDefault(); const data = settingsFromForm(); if (data.repoName && !/^[^/\s]+\/[^/\s]+$/.test(data.repoName)) return toast('Repository format must be owner/repository.'); saveSettings(data); toast('Repository settings saved in this browser.'); });
     $('#syncGithub').addEventListener('click', githubSync);
   }

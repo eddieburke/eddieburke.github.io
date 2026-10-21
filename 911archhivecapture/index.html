@@ -1,117 +1,83 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0e1726" />
-  <meta name="description" content="A local-first source and media archive catalog." />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="app.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f5f5">
+  <meta name="description" content="Save and search source links.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
   <title>Archive Pocket</title>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Primary navigation">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">▣</span><span>Archive<br><b>Pocket</b></span></div>
-      <nav class="nav-tabs" aria-label="Library views">
-        <button class="nav-item active" data-view="library"><span>▤</span> Library <b id="entryCount">0</b></button>
-        <button class="nav-item" data-view="add"><span>＋</span> New capture</button>
-        <button class="nav-item" data-view="imports"><span>⇩</span> Import &amp; export</button>
-        <button class="nav-item" data-view="settings"><span>⚙</span> Repository</button>
-      </nav>
-      <div class="sidebar-bottom">
-        <div class="local-badge"><span></span><div><b>Local-first</b><small>Saved in this browser</small></div></div>
-        <button class="text-button" id="aboutButton">How capture works</button>
+  <header class="app-header">
+    <h1>Archive Pocket</h1>
+    <nav aria-label="Pages">
+      <button class="nav-item active" data-view="library" aria-current="page">Library <span id="entryCount">0</span></button>
+      <button class="nav-item" data-view="add">New capture</button>
+    </nav>
+  </header>
+  <main id="main">
+    <h2 id="viewTitle">Library</h2>
+    <section id="libraryView" class="view active-view" aria-label="Library">
+      <div class="library-toolbar">
+        <input id="searchInput" type="search" aria-label="Search captures" placeholder="Search">
+        <select id="sourceFilter" aria-label="Source"><option value="">All sources</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="threads">Threads</option><option value="linkedin">LinkedIn</option><option value="archive">Internet Archive</option><option value="wayback">Wayback Machine</option><option value="other">Other</option></select>
+        <select id="sortSelect" aria-label="Sort"><option value="newest">Newest saved</option><option value="posted">Date posted</option><option value="title">Title A–Z</option></select>
       </div>
-    </aside>
-
-    <main id="main" class="main-content">
-      <header class="topbar">
-        <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button>
-        <div class="breadcrumbs"><span id="viewEyebrow">YOUR ARCHIVE</span><h1 id="viewTitle">Library</h1></div>
-        <button class="primary-button" id="headerAdd"><span>＋</span> New capture</button>
-      </header>
-
-      <section id="libraryView" class="view active-view" aria-labelledby="viewTitle">
-        <div class="library-toolbar">
-          <label class="searchbox"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search people, titles, tags, sources…" /><kbd>⌘ K</kbd></label>
-          <select id="sourceFilter" aria-label="Filter by source"><option value="">All sources</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="threads">Threads</option><option value="linkedin">LinkedIn</option><option value="archive">Internet Archive</option><option value="wayback">Wayback Machine</option><option value="other">Other</option></select>
-          <select id="sortSelect" aria-label="Sort entries"><option value="newest">Newest captured</option><option value="posted">Date posted</option><option value="title">Title A–Z</option></select>
-        </div>
-        <div id="statsRow" class="stats-row"></div>
-        <div id="emptyLibrary" class="empty-state">
-          <div class="empty-glyph">⌑</div><h2>Begin a durable record.</h2>
-          <p>Save source links, context and media references locally. Use the companion browser helper for pages that require you to be signed in.</p>
-          <button class="primary-button" data-go="add">Create first capture <span>→</span></button>
-        </div>
-        <div id="entryGrid" class="entry-grid" aria-live="polite"></div>
-      </section>
-
-      <section id="addView" class="view" aria-label="New capture">
-        <div class="intro-grid">
-          <div><p class="eyebrow">CAPTURE A SOURCE</p><h2>Collect the context<br>before it disappears.</h2><p class="muted lead">Start with a link, import a capture from the extension, or create a record by hand. All fields remain editable.</p></div>
-          <div class="capture-note"><span>✦</span><p><b>Social pages are personal.</b><br>Archive Pocket never reads or stores browser cookies. The optional extension reads the page you are already viewing, with your permission.</p></div>
-        </div>
-        <div class="capture-layout">
-          <form id="captureForm" class="capture-card">
-            <div class="card-heading"><div><p class="eyebrow">01 · SOURCE</p><h3>Where is it from?</h3></div><span class="step">Required</span></div>
-            <label class="field full"><span>Original URL</span><div class="url-input"><input id="sourceUrl" name="sourceUrl" type="url" placeholder="Paste a post, page, image or video link" required autocomplete="url" /><button type="button" id="openSource" title="Open the source in a new tab">↗</button></div><small id="urlHint">Use the original link whenever possible.</small></label>
-            <div class="source-capture-row"><button type="button" class="secondary-button" id="autoCapture">Open &amp; auto-capture with helper <span>↗</span></button><small id="captureStatus" aria-live="polite">Requires the helper in desktop Chrome, Edge, Firefox, or Brave.</small></div>
-            <div class="quick-sources" aria-label="Recognized sources"><span>Recognizes</span><span>archive.org</span><span>Wayback</span><span>Facebook</span><span>Instagram</span><span>Threads</span><span>LinkedIn</span><span>and more</span></div>
-            <div class="form-divider"></div>
-            <div class="card-heading compact"><div><p class="eyebrow">02 · DESCRIPTION</p><h3>What should this be called?</h3></div><button type="button" id="extractPasted" class="subtle-button">Parse pasted page data</button></div>
-            <div class="two-columns">
-              <label class="field"><span>Post / page title</span><input id="title" name="title" placeholder="First sentence of the post, or a page title" /></label>
-              <label class="field"><span>Person / account</span><input id="person" name="person" placeholder="e.g., Jennifer Porter" /></label>
-              <label class="field"><span>Date posted</span><input id="postedDate" name="postedDate" type="date" /><small id="postedDateDetail"></small></label>
-              <label class="field"><span>Source type</span><select id="sourceType" name="sourceType"><option value="other">Other / website</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="threads">Threads</option><option value="linkedin">LinkedIn</option><option value="archive">Internet Archive</option><option value="wayback">Wayback Machine</option></select></label>
-            </div>
-            <label class="field full"><span>Post text / notes</span><textarea id="notes" name="notes" rows="6" placeholder="Full post text, then your notes or provenance…"></textarea></label>
-            <label class="field full"><span>Tags <small>separate with commas</small></span><input id="tags" name="tags" placeholder="family history, event, 2001" /></label>
-            <div class="form-actions"><button type="reset" class="text-button">Clear form</button><button class="primary-button" type="submit">Save capture <span>→</span></button></div>
-          </form>
-
-          <div class="side-stack">
-            <section class="tip-card"><p class="eyebrow">AUTOMATIC DETAILS</p><h3>Have saved page source?</h3><p>Paste HTML, an Open Graph snippet, or a copied page selection. We will look for the title, author, post date and image links.</p><button type="button" id="openPasteModal" class="secondary-button">Paste &amp; parse details</button></section>
-            <section class="tip-card dark"><p class="eyebrow">FOR SIGNED-IN PAGES</p><h3>Use the browser helper.</h3><p>It runs only in the page you choose, lets you point at a name, date or image, then exports a portable capture file.</p><a class="text-link" href="extension/README.md" target="_blank" rel="noopener">Set up the extension <span>→</span></a></section>
+      <div class="toolbar">
+        <label class="secondary-button file-button">Import JSON<input id="importFile" type="file" accept="application/json,.json"></label>
+        <button id="exportAll" class="secondary-button">Export JSON</button>
+        <small id="exportInfo">0 records</small>
+      </div>
+      <details class="settings">
+        <summary>GitHub &amp; helper settings</summary>
+        <form id="settingsForm">
+          <div class="two-columns">
+            <label>Repository<input id="repoName" placeholder="owner/repository" pattern="[^/\s]+/[^/\s]+"></label>
+            <label>Branch<input id="repoBranch" value="main"></label>
+            <label>Catalog path<input id="repoPath" value="data/archive.json"></label>
+            <label>Media folder<input id="mediaPath" value="media"></label>
           </div>
+          <label>Helper ID <small>Optional; older Chromium helpers only</small><input id="extensionId" autocomplete="off"></label>
+          <button type="submit" class="secondary-button">Save settings</button>
+        </form>
+        <div class="sync-controls">
+          <label>GitHub token <small>Contents write permission; not saved</small><input id="githubToken" type="password" autocomplete="off"></label>
+          <button id="syncGithub" class="secondary-button" type="button">Sync JSON to GitHub</button>
+          <small id="syncStatus" role="status"></small>
         </div>
-      </section>
-
-      <section id="importsView" class="view" aria-label="Import and export">
-        <div class="page-heading"><p class="eyebrow">PORTABLE ARCHIVE</p><h2>Move records without a service.</h2><p>Your private working copy stays in your browser. Export frequently and commit the resulting catalog to your own GitHub repository.</p></div>
-        <div class="transfer-grid">
-          <section class="transfer-card"><span class="card-icon teal">⇩</span><p class="eyebrow">IMPORT</p><h3>Bring in captures</h3><p>Import a JSON backup or an <code>archive-pocket-capture</code> file exported by the companion extension.</p><label class="secondary-button file-button">Choose JSON file<input id="importFile" type="file" accept="application/json,.json" /></label><button class="text-button" id="importSamples">Load the example records</button></section>
-          <section class="transfer-card"><span class="card-icon orange">⇧</span><p class="eyebrow">BACKUP</p><h3>Export your catalog</h3><p>Downloads a plain JSON file: readable, versionable, and ready for <code>data/archive.json</code> in a GitHub repo.</p><button id="exportAll" class="secondary-button">Download catalog JSON</button><small id="exportInfo">No records yet</small></section>
-          <section class="transfer-card"><span class="card-icon blue">◫</span><p class="eyebrow">MEDIA</p><h3>Keep files intentionally</h3><p>Use source or GitHub Raw URLs for permanent references. Files you attach here remain only on this device until you upload them yourself.</p><button class="text-button" data-go="library">Manage media in Library <span>→</span></button></section>
+      </details>
+      <p id="emptyLibrary" class="empty-state">No captures. <button class="text-button" data-go="add">Add one</button></p>
+      <div id="entryGrid" class="entry-grid" aria-live="polite"></div>
+    </section>
+    <section id="addView" class="view" aria-label="Capture editor">
+      <form id="captureForm">
+        <label>Source URL
+          <div class="url-input"><input id="sourceUrl" name="sourceUrl" type="url" required autocomplete="url"><button type="button" id="openSource" class="secondary-button">Open</button></div>
+          <small id="urlHint"></small>
+        </label>
+        <div class="source-capture-row">
+          <button type="button" class="secondary-button" id="autoCapture">Capture with helper</button>
+          <button type="button" class="text-button" id="extractPasted">Paste HTML</button>
+          <small id="captureStatus" role="status"></small>
         </div>
-        <section class="workflow-strip"><div><span>01</span><b>Capture</b><small>Link or extension export</small></div><i></i><div><span>02</span><b>Review</b><small>Correct title, date, rights</small></div><i></i><div><span>03</span><b>Export</b><small>Commit catalog to Git</small></div></section>
-      </section>
-
-      <section id="settingsView" class="view" aria-label="Repository settings">
-        <div class="page-heading"><p class="eyebrow">YOUR REPOSITORY</p><h2>Keep the public archive in your control.</h2><p>Archive Pocket is just static files and browser storage. Configure an optional GitHub repository to generate correct media links and sync the catalog JSON.</p></div>
-        <div class="settings-layout">
-          <form id="settingsForm" class="settings-card">
-            <div class="card-heading"><div><p class="eyebrow">GITHUB PAGES</p><h3>Catalog destination</h3></div><span class="step optional">Optional</span></div>
-            <label class="field full"><span>Public repository <small>owner/repository</small></span><input id="repoName" placeholder="your-name/archive-pocket-data" pattern="[^/\s]+/[^/\s]+" /></label>
-            <div class="two-columns"><label class="field"><span>Branch</span><input id="repoBranch" value="main" /></label><label class="field"><span>Catalog file path</span><input id="repoPath" value="data/archive.json" /></label></div>
-            <label class="field full"><span>Media folder <small>for reference only</small></span><input id="mediaPath" value="media" /><small>When you upload media through GitHub, use this folder and paste the generated Raw URL into a record.</small></label>
-            <div class="form-divider"></div>
-            <label class="field full"><span>Capture Helper extension ID <small>optional · legacy Chromium connection</small></span><input id="extensionId" autocomplete="off" placeholder="32-character ID from chrome://extensions" /><small>Run Install.cmd to set up the helper in your normal Chrome/Edge profile. Firefox needs a Mozilla-signed XPI. The helper connects automatically; no ID is required. The extension receives only the URL you explicitly send.</small></label>
-            <div class="form-actions"><button type="submit" class="secondary-button">Save repository settings</button></div>
-          </form>
-          <section class="settings-card sync-card"><p class="eyebrow">ONE-TIME SYNC</p><h3>Write the catalog JSON to GitHub</h3><p>Paste a <b>fine-grained</b> GitHub token with Contents read/write permission for this one repository. It is used only for this request and is never saved.</p><label class="field"><span>Temporary GitHub token</span><input id="githubToken" type="password" autocomplete="off" placeholder="github_pat_…" /></label><button id="syncGithub" class="primary-button" type="button">Sync catalog to GitHub <span>↗</span></button><small id="syncStatus" aria-live="polite">This sync writes record metadata only, not local files.</small></section>
+        <div class="two-columns">
+          <label>Title<input id="title" name="title"></label>
+          <label>Author<input id="person" name="person"></label>
+          <label>Date posted<input id="postedDate" name="postedDate" type="date"><small id="postedDateDetail"></small></label>
+          <label>Source<select id="sourceType" name="sourceType"><option value="other">Other</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="threads">Threads</option><option value="linkedin">LinkedIn</option><option value="archive">Internet Archive</option><option value="wayback">Wayback Machine</option></select></label>
         </div>
-        <section class="warning-callout"><span>◆</span><div><b>Privacy and platform limits</b><p>A GitHub Pages app cannot access Facebook, Instagram, LinkedIn or other sites’ cookies, nor reliably display those sites in an embedded panel. Open the source in a normal tab, use the extension on pages where you are signed in, and archive only material you are allowed to preserve.</p></div></section>
-      </section>
-    </main>
-  </div>
-
+        <label>Post text / notes<textarea id="notes" name="notes" rows="8"></textarea></label>
+        <label>Tags <small>Comma-separated</small><input id="tags" name="tags"></label>
+        <div class="form-actions"><button class="primary-button" type="submit">Save</button><button type="reset" class="text-button">Clear</button><button type="button" class="text-button" data-go="library">Cancel</button></div>
+      </form>
+    </section>
+  </main>
   <dialog id="entryDialog" class="dialog entry-dialog"><button class="dialog-close" data-close-dialog aria-label="Close">×</button><div id="entryDialogContent"></div></dialog>
-  <dialog id="pasteDialog" class="dialog"><button class="dialog-close" data-close-dialog aria-label="Close">×</button><p class="eyebrow">PASTE &amp; PARSE</p><h2>Extract page details</h2><p class="muted">Paste HTML, Open Graph meta tags, JSON-LD, or text copied from a source. Nothing leaves this browser.</p><textarea id="htmlPaste" rows="13" placeholder="&lt;meta property=&quot;og:title&quot; content=&quot;…&quot;&gt;"></textarea><div class="dialog-actions"><button class="secondary-button" data-close-dialog>Cancel</button><button id="parsePasted" class="primary-button">Parse into form <span>→</span></button></div></dialog>
-  <dialog id="aboutDialog" class="dialog about-dialog"><button class="dialog-close" data-close-dialog aria-label="Close">×</button><p class="eyebrow">DESIGNED FOR REAL-WORLD WEB PAGES</p><h2>What this app can — and cannot — do</h2><div class="about-columns"><div><h3>It can</h3><ul><li>Save a local, searchable catalog in IndexedDB.</li><li>Store source links, notes, dates, tags, media URLs and local image attachments.</li><li>Parse metadata you paste or import from the extension.</li><li>Export portable JSON and optionally write that catalog to your GitHub repository.</li></ul></div><div><h3>It cannot</h3><ul><li>Read, copy or retain the cookies from social networks.</li><li>Bypass sign-in, paywalls, CORS, copyright, download restrictions or a site’s embed policy.</li><li>Guarantee an external source remains live or allows hotlinked media.</li><li>Use GitHub Pages as private file storage.</li></ul></div></div><p class="muted">For a logged-in social page, the extension can inspect the rendered page in your own browser. Review what it captures before importing it.</p></dialog>
+  <dialog id="pasteDialog" class="dialog"><button class="dialog-close" data-close-dialog aria-label="Close">×</button><h2>Paste HTML</h2><textarea id="htmlPaste" rows="12" aria-label="HTML or page text"></textarea><div class="form-actions"><button id="parsePasted" class="primary-button">Extract</button><button class="text-button" data-close-dialog>Cancel</button></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="helper-client.js"></script>
   <script src="app.js"></script>

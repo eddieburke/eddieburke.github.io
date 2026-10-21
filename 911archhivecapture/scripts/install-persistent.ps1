@@ -59,33 +59,21 @@ if ($FirefoxXpi) {
 }
 $website = 'https://eddieburke.github.io/911archhivecapture/'
 $guide = @"
-Archive Pocket Capture Helper $($manifest.version)
+Capture Helper $($manifest.version)
 
-Chrome and Edge: persistent installation in your NORMAL browser profile
-
-1. On the extension manager tab, turn on Developer mode.
-2. Click Load unpacked.
-3. Paste this folder into the folder picker and select it:
-
+Chrome / Edge: Developer mode -> Load unpacked -> select:
 $chromium
 
-4. Refresh Archive Pocket and any source tabs already open.
-
-The extension stays installed when the browser restarts. Leave the above folder in place.
-Run Install.cmd again to update these files, then click Reload on the extension card.
-If you use several browser profiles, choose the profile you normally browse with first.
-The browser requires this initial Load unpacked action; preparing files alone does not install it.
-
+Keep this folder. After an update, click Reload on the extension card.
 App: $website
 
-Firefox: permanent installation requires a Mozilla-signed package.
-Unsigned package ready for signing: $unsignedXpi
-Sign it as an unlisted add-on at https://addons.mozilla.org/developers/addon/submit/distribution
-Then run Install.cmd firefox -FirefoxXpi "C:\path\to\signed-addon.xpi".
-Firefox verifies the signature and asks you to approve installation.
-An unsigned Load Temporary Add-on installation disappears after restart.
+Firefox signing package:
+$unsignedXpi
+Submit for unlisted signing: https://addons.mozilla.org/developers/addon/submit/distribution
+Then: Install.cmd firefox -FirefoxXpi "C:\path\to\signed-addon.xpi"
 
-Test-Browsers.cmd is the separate, explicitly TEMPORARY testing launcher.
+Test-Browsers.cmd uses temporary profiles.
+
 "@
 $guidePath = Join-Path $Destination 'INSTALL.txt'
 [System.IO.File]::WriteAllText($guidePath, $guide, $utf8)
