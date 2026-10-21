@@ -7,7 +7,7 @@ import { randomBytes } from 'node:crypto';
 import { buildExtensions, root } from './build-extensions.mjs';
 
 const requested = process.argv.slice(2);
-if (requested.some(value => !['chrome', 'edge', 'firefox'].includes(value))) throw new Error('Usage: Install.cmd [chrome] [edge] [firefox]');
+if (requested.some(value => !['chrome', 'edge', 'firefox'].includes(value))) throw new Error('Usage: Test-Browsers.cmd [chrome] [edge] [firefox]');
 const selected = requested.length ? [...new Set(requested)] : ['chrome', 'edge', 'firefox'];
 const logDir = join(root, '.browser-tests');
 await mkdir(logDir, { recursive: true });

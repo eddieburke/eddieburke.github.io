@@ -2,32 +2,37 @@
 
 This Chrome, Edge, Firefox, and Brave extension lets Archive Pocket open a source and collect a reviewable metadata record. It does not read or export cookies.
 
-## Automatic Windows test installer
+## Install into your normal browser
 
-Install Node.js 22 or newer from [nodejs.org](https://nodejs.org/), then double-click **Install.cmd** in the project root. It installs its pinned Mozilla `web-ext` dependency, prepares browser-specific extensions in `dist/`, starts a loopback-only app server, and opens every installed browser with the helper loaded. No extension ID is needed.
+Double-click **Install.cmd** in the project root. No Node.js installation is required. It copies the helper to the fixed folder `%LOCALAPPDATA%\ArchivePocket\CaptureHelper\chromium`, copies that path to the clipboard, and opens the extension managers in your normal Chrome and Edge profiles.
 
-Each browser uses a separate temporary test profile. Existing browser windows and profiles are untouched. Sign in to your source in the test window if needed. Keep the installer running while testing, and export any catalog records before closing the session. Closing and rerunning the installer starts fresh test sessions. This is a developer test installation, not a signed permanent store installation.
+1. In the profile you normally use, enable **Developer mode**.
+2. Click **Load unpacked**, paste the copied folder path into the folder picker, and select it.
+3. Refresh Archive Pocket and any source pages already open.
 
-The test tab reports whether a real page capture returned the expected title, author, date, and image URL. Results and launcher logs are in `.browser-tests/`. Select **Open Archive Pocket** on that tab to use the app. The capture source opens in a second tab.
+The extension remains installed after restarting the browser. Keep that fixed folder in place. The installer prepares files and opens the browser; the browser requires this initial Load unpacked action before installation is complete. It does not modify profile databases or browser security policies.
 
-To launch only one browser, run `Install.cmd chrome`, `Install.cmd edge`, or `Install.cmd firefox`. Browser binaries must already be installed. Missing browsers are reported and skipped. Press Ctrl+C in the installer window to end testing.
+To update, rerun **Install.cmd**, then click **Reload** on the helper's extension card. Use `Install.cmd chrome` or `Install.cmd edge` to open just one browser. If multiple browser profiles exist, select the profile you normally use.
 
-## Install unpacked
+### Firefox permanent installation
 
-1. Download or clone this project to your computer.
-2. Open your Chromium browser’s extension page:
-   - Chrome: `chrome://extensions`
-   - Edge: `edge://extensions`
-   - Brave: `brave://extensions`
-3. Turn on **Developer mode**.
-4. Select **Load unpacked** and select the `extension` folder itself, or `dist/chrome` / `dist/edge` after running the installer.
-5. Pin **Archive Pocket Capture Helper** if desired. The app connects automatically.
+Normal Firefox requires a Mozilla-signed XPI for a persistent installation. The installer prepares `%LOCALAPPDATA%\ArchivePocket\CaptureHelper\archive-pocket-firefox-1.3.0-unsigned.xpi` for [unlisted Mozilla signing](https://addons.mozilla.org/developers/addon/submit/distribution). This package is not signed and cannot be installed permanently yet.
 
-For Firefox in your existing profile, run the installer to generate `dist/firefox`, open `about:debugging#/runtime/this-firefox`, select **Load Temporary Add-on**, and choose `dist/firefox/manifest.json`. Firefox removes an unsigned temporary add-on when it restarts. Permanent Firefox distribution requires Mozilla signing; the installer does not turn off signature checks.
+Once Mozilla returns the signed XPI, run:
+
+```bat
+Install.cmd firefox -FirefoxXpi "C:\path\to\signed-addon.xpi"
+```
+
+The installer checks the package's ID, version, and presence of signing metadata, then opens it in normal Firefox. Firefox verifies the actual signature and asks you to approve installation. No signature checks are disabled. **Load Temporary Add-on** is for testing only and disappears after restart.
+
+### Temporary browser tests
+
+**Test-Browsers.cmd** is the separate disposable test launcher (Node.js 22+ required). It opens fresh test profiles and reports real page-capture results under `.browser-tests/`. These profiles are not your daily browser profiles. Export any test records before closing them. `npm run test:browsers` runs the same tests; `npm run install:browsers` opens the normal-profile setup.
 
 ## Automatic app-to-browser workflow
 
-1. Visit your deployed Archive Pocket GitHub Pages site or the installer's local app in the same browser where the helper is loaded.
+1. Visit your deployed Archive Pocket GitHub Pages site or your local development app in the same browser where the helper is loaded.
 2. The helper connects automatically in Chrome, Edge, Firefox, and Brave. The optional extension ID setting remains available for older Chromium installations.
 3. Sign in normally to any sources you are authorized to view, if necessary.
 4. Go to **New capture**, paste a source link, and choose **Open & auto-capture with helper**.

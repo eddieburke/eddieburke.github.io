@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build:extensions": "node scripts/build-extensions.mjs",
-    "install:browsers": "node scripts/install-browsers.mjs",
+    "install:browsers": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-persistent.ps1",
+    "test:browsers": "node scripts/install-browsers.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
