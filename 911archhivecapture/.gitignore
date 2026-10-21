@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+archive-pocket-catalog-*.json
+node_modules/
+dist/
+.browser-tests/

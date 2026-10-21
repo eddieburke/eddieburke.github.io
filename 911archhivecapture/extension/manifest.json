@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Archive Pocket Capture Helper",
+  "version": "1.2.0",
+  "description": "Open a source in your browser and return reviewable metadata to Archive Pocket.",
+  "action": { "default_title": "Capture for Archive Pocket", "default_popup": "popup.html" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["activeTab", "scripting", "storage", "downloads", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [{ "matches": ["<all_urls>"], "js": ["content.js"], "run_at": "document_idle" }, { "matches": ["https://*.github.io/*", "http://localhost/*", "http://127.0.0.1/*"], "js": ["bridge.js"], "run_at": "document_start" }],
+  "externally_connectable": { "matches": ["https://*.github.io/*", "http://localhost/*", "http://127.0.0.1/*"] },
+  "icons": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+}

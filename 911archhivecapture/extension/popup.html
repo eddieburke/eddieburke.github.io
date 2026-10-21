@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="popup.css"><title>Archive Pocket capture</title></head>
+<body><main><header><div class="mark">⌑</div><div><p>ARCHIVE POCKET</p><h1>Capture this page</h1></div></header>
+<p id="pageHost" class="host">Preparing page scan…</p>
+<section class="notice"><b>Private by design.</b> This helper reads visible page metadata and selections only after you use it. It cannot read cookies and does not download protected media.</section>
+<form id="captureForm">
+<label>Source URL<input id="sourceUrl" type="url" required></label>
+<label>Title / description <button class="picker" type="button" data-pick="title">Point at text</button><input id="title" placeholder="Untitled capture"></label>
+<label>Person / account <button class="picker" type="button" data-pick="person">Point at text</button><input id="person" placeholder="Unknown"></label>
+<label>Date posted <button class="picker" type="button" data-pick="postedDate">Point at text</button><input id="postedDate" type="date"></label>
+<label>Notes<textarea id="notes" rows="3" placeholder="Auto-detected page description"></textarea></label>
+<div class="media-label"><span>Media references</span><button class="picker" type="button" data-pick="image">Point at image</button></div>
+<div id="mediaList" class="media-list"><p>Scanning images…</p></div>
+<div class="media-add"><input id="customMedia" placeholder="Paste a direct media URL"><button id="addMedia" type="button">Add</button></div>
+<label>Tags <small>commas</small><input id="tags" placeholder="event, research"></label>
+<button id="exportButton" class="primary" type="submit">Download capture JSON <span>↓</span></button>
+<button id="copyButton" class="secondary" type="button">Copy record JSON</button>
+</form><p id="status" class="status"></p></main><script src="popup.js"></script></body></html>

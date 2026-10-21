@@ -1,0 +1,14 @@
+{
+  "name": "archive-pocket",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:extensions": "node scripts/build-extensions.mjs",
+    "install:browsers": "node scripts/install-browsers.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "web-ext": "10.8.0"
+  }
+}
